@@ -46,6 +46,7 @@ setSupportedCurrencies([
   "crypto_org",
   "crypto_org_croeseid",
   "filecoin",
+  "celo",
 ]);
 
 for (const k in process.env) setEnvUnsafe(k as EnvName, process.env[k]);

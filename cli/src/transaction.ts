@@ -106,6 +106,8 @@ export async function inferTransactions(
       transaction.amount = transaction.useAllAmount
         ? new BigNumber(0)
         : inferAmount(account, opts.amount || "0");
+      // Most probably there's a bug here and this method should `return transaction`,
+      // but every family overwrites this method in cli-transaction.ts so can't really reproduce
       return {
         account,
         transaction,
