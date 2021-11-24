@@ -47,6 +47,7 @@ const getOperationType = (type: string): OperationType => {
     case "GoldWithdrawn":
       return "REWARD_PAYOUT";
     default:
+      log("celo/api", `Unknown operation type ${type} - fallback to NONE`);
       return "NONE";
   }
 };
