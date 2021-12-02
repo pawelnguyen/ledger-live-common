@@ -8,7 +8,13 @@ import type {
   AccountLikeArray,
 } from "../../types";
 
-const options = [];
+const options = [
+  {
+    name: "mode",
+    type: String,
+    desc: "mode of transaction: send, lock, unlock, withdraw, vote, revoke, activate",
+  },
+];
 
 function inferAccounts(account: Account): AccountLikeArray {
   invariant(account.currency.family === "celo", "celo family");
@@ -22,14 +28,32 @@ function inferTransactions(
     account: AccountLike;
     transaction: Transaction;
     mainAccount: Account;
-  }>
+  }>,
+  opts: Record<string, any>
 ): Transaction[] {
+  const mode = opts.mode || "send";
+  invariant(
+    [
+      "send",
+      "lock",
+      "unlock",
+      "withdraw",
+      "vote",
+      "revoke",
+      "activate",
+    ].includes(mode),
+    `Unexpected mode: ${mode}`
+  );
+
   return flatMap(transactions, ({ transaction }) => {
     invariant(transaction.family === "celo", "celo family");
+
+    console.log(transaction)
 
     return {
       ...transaction,
       family: "celo",
+      mode,
     } as Transaction;
   });
 }
