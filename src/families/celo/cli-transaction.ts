@@ -48,8 +48,6 @@ function inferTransactions(
   return flatMap(transactions, ({ transaction }) => {
     invariant(transaction.family === "celo", "celo family");
 
-    console.log(transaction)
-
     return {
       ...transaction,
       family: "celo",
