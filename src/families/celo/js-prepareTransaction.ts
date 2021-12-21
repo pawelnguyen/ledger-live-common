@@ -10,7 +10,7 @@ const prepareTransaction = async (
   transaction: Transaction
 ) => {
   if (
-    !transaction.recipient ||
+    (!transaction.recipient && transaction.mode === "send") ||
     (transaction.recipient && !isValidAddress(transaction.recipient))
   ) {
     return transaction;
