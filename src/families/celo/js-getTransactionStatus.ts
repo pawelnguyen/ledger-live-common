@@ -49,12 +49,14 @@ const getTransactionStatus = async (
     errors.amount = new NotEnoughBalance();
   }
 
-  if (!transaction.recipient) {
-    errors.recipient = new RecipientRequired();
-  } else if (!isValidAddress(transaction.recipient)) {
-    errors.recipient = new InvalidAddress("", {
-      currencyName: account.currency.name,
-    });
+  if (transaction.mode === "send") {
+    if (!transaction.recipient) {
+      errors.recipient = new RecipientRequired();
+    } else if (!isValidAddress(transaction.recipient)) {
+      errors.recipient = new InvalidAddress("", {
+        currencyName: account.currency.name,
+      });
+    }
   }
 
   return Promise.resolve({
