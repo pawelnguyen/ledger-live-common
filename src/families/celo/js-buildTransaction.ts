@@ -10,15 +10,26 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
     ? account.spendableBalance.minus(transaction.fees || 0)
     : amount;
 
-  const celoToken = await kit.contracts.getGoldToken();
+  let celoTransaction: CeloTx;
+  if (transaction.mode === "send") {
+    const celoToken = await kit.contracts.getGoldToken();
 
-  const celoTransaction = {
-    from: account.freshAddress,
-    to: celoToken.address,
-    data: celoToken
-      .transfer(transaction.recipient, value.toFixed())
-      .txo.encodeABI(),
-  };
+    celoTransaction = {
+      from: account.freshAddress,
+      to: celoToken.address,
+      data: celoToken
+        .transfer(transaction.recipient, value.toFixed())
+        .txo.encodeABI(),
+    };
+  } else {
+    const lockedGold = await kit.contracts.getLockedGold();
+    celoTransaction = {
+      from: account.freshAddress,
+      value: value.toFixed(),
+      to: await lockedGold.address,
+      data: await lockedGold.lock().txo.encodeABI(),
+    };
+  }
 
   return {
     ...celoTransaction,
