@@ -40,6 +40,9 @@ const getFeesForTransaction = async ({
     // const lockValue = value.minus(relockValue)
 
     //TODO: estimateGasWithInflationFactor instead?
+    // TODO: min amount?
+    //https://github.com/celo-tools/celo-web-wallet/blob/9ae0dbea6606644a8188da414602d4fbffc3967d/src/consts.ts#L34
+
     gas = await lockedGold
       .lock()
       .txo.estimateGas({ from: account.freshAddress, value: value.toFixed() });
