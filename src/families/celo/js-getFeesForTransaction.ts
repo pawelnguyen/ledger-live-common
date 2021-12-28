@@ -18,20 +18,7 @@ const getFeesForTransaction = async ({
     : BigNumber.minimum(amount, account.spendableBalance);
 
   let gas;
-  if (transaction.family === "celo" && transaction.mode === "send") {
-    //TODO: check sending
-    const celoToken = await kit.contracts.getGoldToken();
-
-    const celoTransaction = {
-      from: account.freshAddress,
-      to: celoToken.address,
-      data: celoToken
-        .transfer(transaction.recipient, value.toFixed())
-        .txo.encodeABI(),
-    };
-
-    gas = await kit.connection.estimateGasWithInflationFactor(celoTransaction);
-  } else {
+  if (transaction.family === "celo" && transaction.mode === "lock") {
     const lockedGold = await kit.contracts.getLockedGold();
 
     // TODO: handle relock - pending withdrawals of locked Celo?
@@ -46,6 +33,25 @@ const getFeesForTransaction = async ({
     gas = await lockedGold
       .lock()
       .txo.estimateGas({ from: account.freshAddress, value: value.toFixed() });
+  } else if (transaction.family === "celo" && transaction.mode === "unlock") {
+    const lockedGold = await kit.contracts.getLockedGold();
+
+    gas = await lockedGold
+      .unlock(value)
+      .txo.estimateGas({ from: account.freshAddress });
+  } else {
+    //TODO: check sending
+    const celoToken = await kit.contracts.getGoldToken();
+
+    const celoTransaction = {
+      from: account.freshAddress,
+      to: celoToken.address,
+      data: celoToken
+        .transfer(transaction.recipient, value.toFixed())
+        .txo.encodeABI(),
+    };
+
+    gas = await kit.connection.estimateGasWithInflationFactor(celoTransaction);
   }
 
   const gasPrice = new BigNumber(await kit.connection.gasPrice());

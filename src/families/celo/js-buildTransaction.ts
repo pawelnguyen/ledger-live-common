@@ -11,7 +11,23 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
     : amount;
 
   let celoTransaction: CeloTx;
-  if (transaction.mode === "send") {
+
+  if (transaction.mode === "lock") {
+    const lockedGold = await kit.contracts.getLockedGold();
+    celoTransaction = {
+      from: account.freshAddress,
+      value: value.toFixed(),
+      to: lockedGold.address,
+      data: lockedGold.lock().txo.encodeABI(),
+    };
+  } else if (transaction.mode === "unlock") {
+    const lockedGold = await kit.contracts.getLockedGold();
+    celoTransaction = {
+      from: account.freshAddress,
+      to: lockedGold.address,
+      data: lockedGold.unlock(value).txo.encodeABI(),
+    };
+  } else {
     const celoToken = await kit.contracts.getGoldToken();
 
     celoTransaction = {
@@ -20,14 +36,6 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       data: celoToken
         .transfer(transaction.recipient, value.toFixed())
         .txo.encodeABI(),
-    };
-  } else {
-    const lockedGold = await kit.contracts.getLockedGold();
-    celoTransaction = {
-      from: account.freshAddress,
-      value: value.toFixed(),
-      to: await lockedGold.address,
-      data: await lockedGold.lock().txo.encodeABI(),
     };
   }
 
