@@ -39,6 +39,15 @@ const getFeesForTransaction = async ({
     gas = await lockedGold
       .unlock(value)
       .txo.estimateGas({ from: account.freshAddress });
+  } else if (transaction.family === "celo" && transaction.mode === "withdraw") {
+    const lockedGold = await kit.contracts.getLockedGold();
+
+    //TODO: handle index of pending withdrawal
+    const withdrawalIndex = 0;
+    //TODO: test and add to buildTransaction after withdrawal isn't pending anymore
+    gas = await lockedGold
+      .withdraw(withdrawalIndex)
+      .txo.estimateGas({ from: account.freshAddress });
   } else {
     //TODO: check sending
     const celoToken = await kit.contracts.getGoldToken();
