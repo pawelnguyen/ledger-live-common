@@ -44,6 +44,27 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       to: election.address,
       data: vote.txo.encodeABI(),
     };
+  } else if (transaction.mode === "revoke") {
+    const election = await kit.contracts.getElection();
+    const accounts = await kit.contracts.getAccounts();
+
+    const voteSignerAccount = await accounts.voteSignerToAccount(
+      account.freshAddress
+    );
+
+    const revoke = await election.revoke(
+      voteSignerAccount,
+      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      new BigNumber(value)
+    );
+
+    //TODO: revoke returns an array because multiple votes can be casted to a validator group? UI?
+    //are we fine revoking only first vote?
+    celoTransaction = {
+      from: account.freshAddress,
+      to: election.address,
+      data: revoke[0].txo.encodeABI(),
+    };
   } else {
     const celoToken = await kit.contracts.getGoldToken();
 

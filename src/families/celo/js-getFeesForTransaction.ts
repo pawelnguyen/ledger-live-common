@@ -59,6 +59,21 @@ const getFeesForTransaction = async ({
       new BigNumber(value)
     );
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
+  } else if (transaction.family === "celo" && transaction.mode === "revoke") {
+    const election = await kit.contracts.getElection();
+    const accounts = await kit.contracts.getAccounts();
+    const voteSignerAccount = await accounts.voteSignerToAccount(
+      account.freshAddress
+    );
+
+    const revoke = await election.revoke(
+      voteSignerAccount,
+      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      new BigNumber(value)
+    );
+    //TODO: revoke returns an array because multiple votes can be casted to a validator group? UI?
+    //are we fine revoking only first vote?
+    gas = await revoke[0].txo.estimateGas({ from: account.freshAddress });
   } else {
     //TODO: check sending
     const celoToken = await kit.contracts.getGoldToken();
