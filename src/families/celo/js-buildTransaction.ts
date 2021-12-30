@@ -2,6 +2,11 @@ import type { Transaction } from "./types";
 import type { Account } from "../../types";
 import { CeloTx } from "@celo/connect";
 import { celoKit } from "./api/sdk";
+import { BigNumber } from "bignumber.js";
+
+//DRY, extract to constants
+const FIGMENT_VALIDATOR_GROUP_ADDRESS =
+  "0x01b2b83fDf26aFC3Ca7062C35Bc68c8DdE56dB04";
 
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
@@ -26,6 +31,18 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       from: account.freshAddress,
       to: lockedGold.address,
       data: lockedGold.unlock(value).txo.encodeABI(),
+    };
+  } else if (transaction.mode === "vote") {
+    const election = await kit.contracts.getElection();
+    const vote = await election.vote(
+      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      new BigNumber(value)
+    );
+
+    celoTransaction = {
+      from: account.freshAddress,
+      to: election.address,
+      data: vote.txo.encodeABI(),
     };
   } else {
     const celoToken = await kit.contracts.getGoldToken();
