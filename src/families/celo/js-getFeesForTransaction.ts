@@ -66,14 +66,32 @@ const getFeesForTransaction = async ({
       account.freshAddress
     );
 
-    const revoke = await election.revoke(
+    const revokes = await election.revoke(
       voteSignerAccount,
       FIGMENT_VALIDATOR_GROUP_ADDRESS,
       new BigNumber(value)
     );
+
     //TODO: revoke returns an array because multiple votes can be casted to a validator group? UI?
-    //are we fine revoking only first vote?
-    gas = await revoke[0].txo.estimateGas({ from: account.freshAddress });
+    //are we fine revoking only last vote?
+    const revoke = revokes.pop();
+    if (!revoke) return new BigNumber(0);
+
+    gas = await revoke.txo.estimateGas({ from: account.freshAddress });
+  } else if (transaction.family === "celo" && transaction.mode === "activate") {
+    const election = await kit.contracts.getElection();
+    const accounts = await kit.contracts.getAccounts();
+    const voteSignerAccount = await accounts.voteSignerToAccount(
+      account.freshAddress
+    );
+
+    const activates = await election.activate(voteSignerAccount);
+    //TODO: activate returns an array because multiple votes can be casted to a validator group? UI?
+    //are we fine activating only last vote?
+    const activate = activates.pop();
+    if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
+
+    gas = await activate.txo.estimateGas({ from: account.freshAddress });
   } else {
     //TODO: check sending
     const celoToken = await kit.contracts.getGoldToken();
