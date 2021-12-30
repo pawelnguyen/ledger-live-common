@@ -45,6 +45,11 @@ const getFeesForTransaction = async ({
   } else if (transaction.family === "celo" && transaction.mode === "withdraw") {
     const lockedGold = await kit.contracts.getLockedGold();
 
+    //https://github.com/celo-org/celo-monorepo/blob/master/packages/cli/src/commands/lockedgold/withdraw.ts#L31
+    const pendingWithdrawals = await lockedGold.getPendingWithdrawals(account.freshAddress);
+    console.log('pendingWithdrawals', pendingWithdrawals,pendingWithdrawals[0].time)
+
+
     //TODO: handle index of pending withdrawal
     const withdrawalIndex = 0;
     //TODO: test and add to buildTransaction after withdrawal isn't pending anymore
@@ -72,10 +77,13 @@ const getFeesForTransaction = async ({
       new BigNumber(value)
     );
 
-    //TODO: revoke returns an array because multiple votes can be casted to a validator group? UI?
-    //are we fine revoking only last vote?
+    console.log('revokes', revokes)
+
+    //TODO: revoke returns an array with revokes for each validator group voted. find revokes for Figment validator group
     const revoke = revokes.pop();
     if (!revoke) return new BigNumber(0);
+
+    console.log(revoke)
 
     gas = await revoke.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.family === "celo" && transaction.mode === "activate") {
@@ -85,9 +93,14 @@ const getFeesForTransaction = async ({
       account.freshAddress
     );
 
+    //TODO: check if has pending votes -> in getTransactionStatus?
+    const hasPendingVotes = await election.hasPendingVotes(voteSignerAccount)
+    const hasActivatable = await election.hasActivatablePendingVotes(voteSignerAccount)
+
     const activates = await election.activate(voteSignerAccount);
-    //TODO: activate returns an array because multiple votes can be casted to a validator group? UI?
-    //are we fine activating only last vote?
+    console.log('activates', activates, hasPendingVotes, hasActivatable)
+    //TODO: activate returns an array
+    //find activates only for Figment validator group
     const activate = activates.pop();
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
 
