@@ -2,6 +2,9 @@ import { BigNumber } from "bignumber.js";
 import { Account, Transaction } from "../../types";
 import { celoKit } from "./api/sdk";
 
+const FIGMENT_VALIDATOR_GROUP_ADDRESS =
+  "0x01b2b83fDf26aFC3Ca7062C35Bc68c8DdE56dB04";
+
 const getFeesForTransaction = async ({
   account,
   transaction,
@@ -48,6 +51,14 @@ const getFeesForTransaction = async ({
     gas = await lockedGold
       .withdraw(withdrawalIndex)
       .txo.estimateGas({ from: account.freshAddress });
+  } else if (transaction.family === "celo" && transaction.mode === "vote") {
+    const election = await kit.contracts.getElection();
+
+    const vote = await election.vote(
+      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      new BigNumber(value)
+    );
+    gas = await vote.txo.estimateGas({ from: account.freshAddress });
   } else {
     //TODO: check sending
     const celoToken = await kit.contracts.getGoldToken();
