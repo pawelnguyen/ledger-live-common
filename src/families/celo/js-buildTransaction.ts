@@ -32,6 +32,15 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       to: lockedGold.address,
       data: lockedGold.unlock(value).txo.encodeABI(),
     };
+  } else if (transaction.mode === "withdraw") {
+    const lockedGold = await kit.contracts.getLockedGold();
+    const withdrawalIndex = 0;
+
+    celoTransaction = {
+      from: account.freshAddress,
+      to: lockedGold.address,
+      data: await lockedGold.withdraw(withdrawalIndex).txo.encodeABI(),
+    };
   } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();
     const vote = await election.vote(
