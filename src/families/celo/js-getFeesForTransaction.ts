@@ -94,11 +94,12 @@ const getFeesForTransaction = async ({
     );
 
     //TODO: check if has pending votes -> in getTransactionStatus?
-    const hasPendingVotes = await election.hasPendingVotes(voteSignerAccount)
-    const hasActivatable = await election.hasActivatablePendingVotes(voteSignerAccount)
+    const hasPendingVotes = await election.hasPendingVotes(voteSignerAccount);
+    const hasActivatable = await election.hasActivatablePendingVotes(
+      voteSignerAccount
+    );
 
     const activates = await election.activate(voteSignerAccount);
-    console.log('activates', activates, hasPendingVotes, hasActivatable)
     //TODO: activate returns an array
     //find activates only for Figment validator group
     const activate = activates.pop();
