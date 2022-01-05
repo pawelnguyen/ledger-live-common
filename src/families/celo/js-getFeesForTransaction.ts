@@ -46,9 +46,9 @@ const getFeesForTransaction = async ({
     const lockedGold = await kit.contracts.getLockedGold();
 
     //https://github.com/celo-org/celo-monorepo/blob/master/packages/cli/src/commands/lockedgold/withdraw.ts#L31
+    //TODO: check time of withdrawal and if less than current time - withdraw first?
     const pendingWithdrawals = await lockedGold.getPendingWithdrawals(account.freshAddress);
-    console.log('pendingWithdrawals', pendingWithdrawals,pendingWithdrawals[0].time)
-
+    // console.log('pendingWithdrawals', pendingWithdrawals, pendingWithdrawals[0],  pendingWithdrawals[0].value.toFixed(), pendingWithdrawals[0].time)
 
     //TODO: handle index of pending withdrawal
     const withdrawalIndex = 0;
