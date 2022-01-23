@@ -32,13 +32,6 @@ const celo: AppSpec<Transaction> = {
           updates: [{ recipient }, { amount }],
         };
       },
-      test: ({ accountBeforeTransaction, operation, account }) => {
-        expect(account.spendableBalance.toString()).toBe(
-          accountBeforeTransaction.spendableBalance
-            .minus(operation.value)
-            .toString()
-        );
-      },
     },
     {
       name: "send max to another account",
@@ -49,15 +42,13 @@ const celo: AppSpec<Transaction> = {
         const recipient = sibling.freshAddress;
         return {
           transaction: bridge.createTransaction(account),
-          updates: [{ recipient }, { useAllAmount: true }]
+          updates: [{ recipient }, { useAllAmount: true }],
         };
-      },
-      test: ({ account }) => {
-        expect(account.spendableBalance.toString()).toBe("0");
       },
     },
   ],
 };
+
 export default {
   celo,
 };
