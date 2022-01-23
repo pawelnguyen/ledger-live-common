@@ -1,5 +1,4 @@
 import invariant from "invariant";
-import expect from "expect";
 import type { Transaction } from "./types";
 import { getCryptoCurrencyById, parseCurrencyUnit } from "../../currencies";
 import { pickSiblings } from "../../bot/specs";
