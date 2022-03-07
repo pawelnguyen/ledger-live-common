@@ -12,7 +12,7 @@ const options = [
   {
     name: "mode",
     type: String,
-    desc: "mode of transaction: send, lock, unlock, withdraw, vote, revoke, activate",
+    desc: "mode of transaction: send, lock, unlock, withdraw, vote, revoke, activate, register",
   },
 ];
 
@@ -41,6 +41,7 @@ function inferTransactions(
       "vote",
       "revoke",
       "activate",
+      "register",
     ].includes(mode),
     `Unexpected mode: ${mode}`
   );

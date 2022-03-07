@@ -11,7 +11,8 @@ export type CeloOperationMode =
   | "withdraw"
   | "vote"
   | "revoke"
-  | "activate";
+  | "activate"
+  | "register";
 export type Transaction = TransactionCommon & {
   family: "celo";
   fees: BigNumber | null | undefined;
