@@ -35,8 +35,11 @@ const getTransactionStatus = async (
 
   if (amount.lt(0)) amount = new BigNumber(0);
 
-  if (amount.lte(0) && !transaction.useAllAmount) {
-    errors.amount = new AmountRequired();
+  //TODO: also activate, withdraw?
+  if (transaction.mode != "register") {
+    if (amount.lte(0) && !transaction.useAllAmount) {
+      errors.amount = new AmountRequired();
+    }
   }
 
   const totalSpent = amount.plus(estimatedFees);

@@ -106,6 +106,10 @@ const getFeesForTransaction = async ({
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
 
     gas = await activate.txo.estimateGas({ from: account.freshAddress });
+  } else if (transaction.family === "celo" && transaction.mode === "register") {
+    const accounts = await kit.contracts.getAccounts();
+
+    gas = await accounts.createAccount().txo.estimateGas({ from: account.freshAddress });
   } else {
     //TODO: check sending
     const celoToken = await kit.contracts.getGoldToken();

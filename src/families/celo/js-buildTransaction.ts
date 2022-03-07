@@ -89,6 +89,14 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       to: election.address,
       data: activate.txo.encodeABI(),
     };
+  } else if (transaction.mode === "register") {
+    const accounts = await kit.contracts.getAccounts();
+
+    celoTransaction = {
+      from: account.freshAddress,
+      to: accounts.address,
+      data: accounts.createAccount().txo.encodeABI(),
+    };
   } else {
     // Send
     const celoToken = await kit.contracts.getGoldToken();
