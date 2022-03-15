@@ -13,6 +13,12 @@ export type CeloOperationMode =
   | "revoke"
   | "activate"
   | "register";
+export type CeloResources = {
+  registrationStatus: boolean;
+};
+export type CeloResourcesRaw = {
+  registrationStatus: boolean;
+};
 export type Transaction = TransactionCommon & {
   family: "celo";
   fees: BigNumber | null | undefined;
