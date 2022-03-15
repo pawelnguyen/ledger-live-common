@@ -3,6 +3,7 @@ import { encodeAccountId } from "../../account";
 import type { GetAccountShape } from "../../bridge/jsHelpers";
 import { makeSync, makeScanAccounts, mergeOps } from "../../bridge/jsHelpers";
 import { getAccountDetails } from "./api";
+import { getAccountRegistrationStatus } from "./api/sdk";
 
 const getAccountShape: GetAccountShape = async (info) => {
   const { address, currency, initialAccount, derivationMode } = info;
@@ -21,6 +22,9 @@ const getAccountShape: GetAccountShape = async (info) => {
     spendableBalance,
     operations: newOperations,
   } = await getAccountDetails(address, accountId);
+
+  const accountRegistrationStatus = await getAccountRegistrationStatus(address);
+
   const operations = mergeOps(oldOperations, newOperations);
   const shape = {
     id: accountId,
@@ -28,6 +32,9 @@ const getAccountShape: GetAccountShape = async (info) => {
     spendableBalance,
     operationsCount: operations.length,
     blockHeight,
+    celoResources: {
+      registrationStatus: accountRegistrationStatus,
+    },
   };
   return { ...shape, operations };
 };
