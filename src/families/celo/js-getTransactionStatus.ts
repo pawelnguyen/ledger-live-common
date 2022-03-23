@@ -10,6 +10,10 @@ import {
 } from "@ledgerhq/errors";
 import { BigNumber } from "bignumber.js";
 import { isValidAddress } from "@celo/utils/lib/address";
+import { CeloAllFundsWarning } from "./errors";
+
+// Arbitrary buffer for paying fees of next transactions. 0.03 Celo for ~100 transactions
+const FEES_SAFETY_BUFFER = new BigNumber(3000000000000000);
 
 const getTransactionStatus = async (
   account: Account,
@@ -33,9 +37,16 @@ const getTransactionStatus = async (
     ? account.spendableBalance.minus(estimatedFees)
     : new BigNumber(transaction.amount);
 
+  if (
+    transaction.mode == "lock" &&
+    amount.gte(account.spendableBalance.minus(FEES_SAFETY_BUFFER))
+  ) {
+    warnings.amount = new CeloAllFundsWarning();
+  }
+
   //TODO: also activate, withdraw?
   if (transaction.mode != "register") {
-    if (amount.lte(0) && !transaction.useAllAmount) {
+    if (amount.lte(0) && !useAllAmount) {
       errors.amount = new AmountRequired();
     }
   }
