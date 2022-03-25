@@ -4,6 +4,7 @@ import type { GetAccountShape } from "../../bridge/jsHelpers";
 import { makeSync, makeScanAccounts, mergeOps } from "../../bridge/jsHelpers";
 import { getAccountDetails } from "./api";
 import { getAccountRegistrationStatus } from "./api/sdk";
+import { BigNumber } from "bignumber.js";
 
 const getAccountShape: GetAccountShape = async (info) => {
   const { address, currency, initialAccount, derivationMode } = info;
@@ -34,6 +35,9 @@ const getAccountShape: GetAccountShape = async (info) => {
     blockHeight,
     celoResources: {
       registrationStatus: accountRegistrationStatus,
+      lockedBalance: new BigNumber(5000000000000000),
+      unlockedBalance: new BigNumber(6000000000000000),
+      unlockingBalance: new BigNumber(7000000000000000),
     },
   };
   return { ...shape, operations };
