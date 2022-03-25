@@ -15,9 +15,15 @@ export type CeloOperationMode =
   | "register";
 export type CeloResources = {
   registrationStatus: boolean;
+  lockedBalance: BigNumber;
+  unlockedBalance: BigNumber;
+  unlockingBalance: BigNumber;
 };
 export type CeloResourcesRaw = {
   registrationStatus: boolean;
+  lockedBalance: string;
+  unlockedBalance: string;
+  unlockingBalance: string;
 };
 export type Transaction = TransactionCommon & {
   family: "celo";
