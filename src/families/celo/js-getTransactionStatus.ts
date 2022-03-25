@@ -41,6 +41,8 @@ const getTransactionStatus = async (
     amount = new BigNumber(transaction.amount);
   }
 
+  if (amount.lt(0)) amount = new BigNumber(0);
+
   if (
     transaction.mode == "lock" &&
     amount.gte(account.spendableBalance.minus(FEES_SAFETY_BUFFER))
