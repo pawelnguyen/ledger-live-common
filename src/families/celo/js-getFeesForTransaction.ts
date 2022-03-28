@@ -16,9 +16,22 @@ const getFeesForTransaction = async ({
   const kit = celoKit();
 
   // A workaround - estimating gas throws an error if value > funds
-  const value = transaction.useAllAmount
-    ? account.spendableBalance
-    : BigNumber.minimum(amount, account.spendableBalance);
+  let value;
+
+  //TODO: needs refactoring?
+  if (
+    transaction.family === "celo" &&
+    transaction.mode === "unlock" &&
+    account.celoResources
+  ) {
+    value = transaction.useAllAmount
+      ? account.celoResources.nonvotingLockedBalance
+      : BigNumber.minimum(amount, account.celoResources.nonvotingLockedBalance);
+  } else {
+    value = transaction.useAllAmount
+      ? account.spendableBalance
+      : BigNumber.minimum(amount, account.spendableBalance);
+  }
 
   let gas;
   if (transaction.family === "celo" && transaction.mode === "lock") {
