@@ -34,17 +34,18 @@ const getTransactionStatus = async (
   const estimatedFees = transaction.fees || new BigNumber(0);
 
   let amount;
-  if (useAllAmount) {
+  if (useAllAmount && transaction.mode === "unlock") {
+    amount = account.celoResources?.nonvotingLockedBalance ?? new BigNumber(0);
+  } else if (useAllAmount) {
     amount = account.spendableBalance.minus(estimatedFees);
     if (transaction.mode === "lock") amount = amount.minus(FEES_SAFETY_BUFFER);
   } else {
     amount = new BigNumber(transaction.amount);
   }
-
   if (amount.lt(0)) amount = new BigNumber(0);
 
   if (
-    transaction.mode == "lock" &&
+    transaction.mode === "lock" &&
     amount.gte(account.spendableBalance.minus(FEES_SAFETY_BUFFER))
   ) {
     warnings.amount = new CeloAllFundsWarning();

@@ -21,6 +21,8 @@ const getAccountShape: GetAccountShape = async (info) => {
     balance,
     spendableBalance,
     operations: newOperations,
+    lockedBalance,
+    nonvotingLockedBalance,
   } = await getAccountDetails(address, accountId);
 
   const accountRegistrationStatus = await getAccountRegistrationStatus(address);
@@ -34,9 +36,8 @@ const getAccountShape: GetAccountShape = async (info) => {
     blockHeight,
     celoResources: {
       registrationStatus: accountRegistrationStatus,
-      lockedBalance: new BigNumber(5000000000000000),
-      unlockedBalance: new BigNumber(6000000000000000),
-      unlockingBalance: new BigNumber(7000000000000000),
+      lockedBalance,
+      nonvotingLockedBalance,
     },
   };
   return { ...shape, operations };

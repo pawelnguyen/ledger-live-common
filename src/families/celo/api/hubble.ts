@@ -84,6 +84,9 @@ export const getAccountDetails = async (address: string, accountId: string) => {
   const accountDetails = await fetchAccountDetails(address);
   const spendableBalance = new BigNumber(accountDetails.gold_balance);
   const lockedBalance = new BigNumber(accountDetails.total_locked_gold);
+  const nonvotingLockedBalance = new BigNumber(
+    accountDetails.total_nonvoting_locked_gold
+  );
   const balance = spendableBalance.plus(lockedBalance);
   const indexerStatus = await fetchStatus();
 
@@ -99,5 +102,7 @@ export const getAccountDetails = async (address: string, accountId: string) => {
     balance,
     spendableBalance,
     operations,
+    lockedBalance,
+    nonvotingLockedBalance,
   };
 };
