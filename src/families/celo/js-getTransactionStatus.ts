@@ -60,8 +60,14 @@ const getTransactionStatus = async (
 
   const totalSpent = amount.plus(estimatedFees);
 
-  if (totalSpent.gt(account.spendableBalance)) {
-    errors.amount = new NotEnoughBalance();
+  if (transaction.mode === "unlock") {
+    if (amount.gt(account.celoResources?.nonvotingLockedBalance)) {
+      errors.amount = new NotEnoughBalance();
+    }
+  } else {
+    if (totalSpent.gt(account.spendableBalance)) {
+      errors.amount = new NotEnoughBalance();
+    }
   }
 
   if (!errors.amount && account.spendableBalance.lt(estimatedFees)) {
