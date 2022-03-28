@@ -11,9 +11,19 @@ const FIGMENT_VALIDATOR_GROUP_ADDRESS =
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
   const { amount } = transaction;
-  const value = transaction.useAllAmount
-    ? account.spendableBalance.minus(transaction.fees || 0)
-    : amount;
+
+  let value;
+
+  //TODO: needs refactoring?
+  if (transaction.mode === "unlock" && account.celoResources) {
+    value = transaction.useAllAmount
+      ? account.celoResources.nonvotingLockedBalance
+      : amount;
+  } else {
+    value = transaction.useAllAmount
+      ? account.spendableBalance.minus(transaction.fees || 0)
+      : amount;
+  }
 
   let celoTransaction: CeloTx;
 
