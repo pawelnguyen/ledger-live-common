@@ -2,7 +2,7 @@ import { encodeAccountId } from "../../account";
 import type { GetAccountShape } from "../../bridge/jsHelpers";
 import { makeSync, makeScanAccounts, mergeOps } from "../../bridge/jsHelpers";
 import { getAccountDetails } from "./api";
-import { getAccountRegistrationStatus } from "./api/sdk";
+import { getAccountRegistrationStatus, getPendingWithdrawals } from "./api/sdk";
 import { BigNumber } from "bignumber.js";
 
 const getAccountShape: GetAccountShape = async (info) => {
@@ -26,6 +26,10 @@ const getAccountShape: GetAccountShape = async (info) => {
   } = await getAccountDetails(address, accountId);
 
   const accountRegistrationStatus = await getAccountRegistrationStatus(address);
+
+  const pendingWithdrawals = await getPendingWithdrawals(address);
+
+  console.log('pendingWithdrawals', pendingWithdrawals);
 
   const operations = mergeOps(oldOperations, newOperations);
   const shape = {

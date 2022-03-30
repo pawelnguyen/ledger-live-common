@@ -15,3 +15,10 @@ export const getAccountRegistrationStatus = async (address: string) => {
   const accounts = await kit.contracts.getAccounts();
   return await accounts.isAccount(address);
 };
+
+export const getPendingWithdrawals = async (address: string) => {
+  const kit = celoKit();
+  const lockedGold = await kit.contracts.getLockedGold();
+  const pendingWithdrawals = await lockedGold.getPendingWithdrawals(address);
+  return pendingWithdrawals;
+};
