@@ -40,11 +40,13 @@ export type Transaction = TransactionCommon & {
   family: "celo";
   fees: BigNumber | null | undefined;
   mode: CeloOperationMode;
+  index: number | null | undefined;
 };
 export type TransactionRaw = TransactionCommonRaw & {
   family: "celo";
   fees: string | null | undefined;
   mode: CeloOperationMode;
+  index: number | null | undefined;
 };
 
 export type CoreStatics = Record<string, never>;

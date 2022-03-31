@@ -51,12 +51,13 @@ const getTransactionStatus = async (
     warnings.amount = new CeloAllFundsWarning();
   }
 
-  //TODO: also activate, withdraw?
-  if (transaction.mode != "register") {
+  //TODO: also activate
+  if (transaction.mode != "register" && transaction.mode != "withdraw") {
     if (amount.lte(0) && !useAllAmount) {
       errors.amount = new AmountRequired();
     }
   }
+  //TODO: withdraw, activate -> index required?
 
   const totalSpent = amount.plus(estimatedFees);
 

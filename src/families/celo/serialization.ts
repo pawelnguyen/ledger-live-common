@@ -3,12 +3,17 @@ import type { CeloResources, CeloResourcesRaw } from "./types";
 import { BigNumber } from "bignumber.js";
 
 export function toCeloResourcesRaw(r: CeloResources): CeloResourcesRaw {
-  const { registrationStatus, lockedBalance, nonvotingLockedBalance } = r;
+  const {
+    registrationStatus,
+    lockedBalance,
+    nonvotingLockedBalance,
+    pendingWithdrawals,
+  } = r;
   return {
     registrationStatus,
     lockedBalance: lockedBalance.toString(),
     nonvotingLockedBalance: nonvotingLockedBalance.toString(),
-    pendingWithdrawals: r.pendingWithdrawals?.map((u) => ({
+    pendingWithdrawals: pendingWithdrawals?.map((u) => ({
       value: u.value.toString(),
       time: u.time.toString(),
       index: u.index.toString(),
