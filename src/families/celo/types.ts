@@ -13,15 +13,28 @@ export type CeloOperationMode =
   | "revoke"
   | "activate"
   | "register";
+
+export type CeloPendingWithdrawal = {
+  value: BigNumber;
+  time: BigNumber;
+  index: number;
+};
+export type CeloPendingWithdrawalRaw = {
+  value: string;
+  time: string;
+  index: string;
+};
 export type CeloResources = {
   registrationStatus: boolean;
   lockedBalance: BigNumber;
   nonvotingLockedBalance: BigNumber;
+  pendingWithdrawals: CeloPendingWithdrawal[] | null | undefined;
 };
 export type CeloResourcesRaw = {
   registrationStatus: boolean;
   lockedBalance: string;
   nonvotingLockedBalance: string;
+  pendingWithdrawals: CeloPendingWithdrawalRaw[] | null | undefined;
 };
 export type Transaction = TransactionCommon & {
   family: "celo";

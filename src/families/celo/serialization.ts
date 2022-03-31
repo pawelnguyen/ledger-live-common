@@ -8,6 +8,11 @@ export function toCeloResourcesRaw(r: CeloResources): CeloResourcesRaw {
     registrationStatus,
     lockedBalance: lockedBalance.toString(),
     nonvotingLockedBalance: nonvotingLockedBalance.toString(),
+    pendingWithdrawals: r.pendingWithdrawals?.map((u) => ({
+      value: u.value.toString(),
+      time: u.time.toString(),
+      index: u.index.toString(),
+    })),
   };
 }
 
@@ -17,5 +22,10 @@ export function fromCeloResourcesRaw(r: CeloResourcesRaw): CeloResources {
     registrationStatus,
     lockedBalance: new BigNumber(lockedBalance),
     nonvotingLockedBalance: new BigNumber(nonvotingLockedBalance),
+    pendingWithdrawals: r.pendingWithdrawals?.map((u) => ({
+      value: new BigNumber(u.value),
+      time: new BigNumber(u.time),
+      index: Number(u.time),
+    })),
   };
 }

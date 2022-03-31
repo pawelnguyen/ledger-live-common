@@ -16,9 +16,16 @@ export const getAccountRegistrationStatus = async (address: string) => {
   return await accounts.isAccount(address);
 };
 
+//TODO: desc, types
 export const getPendingWithdrawals = async (address: string) => {
   const kit = celoKit();
   const lockedGold = await kit.contracts.getLockedGold();
   const pendingWithdrawals = await lockedGold.getPendingWithdrawals(address);
-  return pendingWithdrawals;
+  const pendingWithdrawalsWithIndexes = pendingWithdrawals.map(
+    (withdrawal, index) => ({
+      ...withdrawal,
+      index,
+    })
+  );
+  return pendingWithdrawalsWithIndexes;
 };
