@@ -25,7 +25,7 @@ export function fromCeloResourcesRaw(r: CeloResourcesRaw): CeloResources {
     pendingWithdrawals: r.pendingWithdrawals?.map((u) => ({
       value: new BigNumber(u.value),
       time: new BigNumber(u.time),
-      index: Number(u.time),
+      index: Number(u.index),
     })),
   };
 }
