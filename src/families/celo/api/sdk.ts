@@ -21,11 +21,11 @@ export const getPendingWithdrawals = async (address: string) => {
   const kit = celoKit();
   const lockedGold = await kit.contracts.getLockedGold();
   const pendingWithdrawals = await lockedGold.getPendingWithdrawals(address);
-  const pendingWithdrawalsWithIndexes = pendingWithdrawals.map(
-    (withdrawal, index) => ({
+  const pendingWithdrawalsWithIndexes = pendingWithdrawals
+    .map((withdrawal, index) => ({
       ...withdrawal,
       index,
-    })
-  );
+    }))
+    .sort((a, b) => a.time.minus(b.time).toNumber());
   return pendingWithdrawalsWithIndexes;
 };

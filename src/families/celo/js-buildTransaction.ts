@@ -10,7 +10,7 @@ const FIGMENT_VALIDATOR_GROUP_ADDRESS =
 
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
-  const { amount } = transaction;
+  const { amount, index } = transaction;
 
   let value;
 
@@ -44,12 +44,11 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
     };
   } else if (transaction.mode === "withdraw") {
     const lockedGold = await kit.contracts.getLockedGold();
-    const withdrawalIndex = 0;
 
     celoTransaction = {
       from: account.freshAddress,
       to: lockedGold.address,
-      data: await lockedGold.withdraw(withdrawalIndex).txo.encodeABI(),
+      data: await lockedGold.withdraw(index || 0).txo.encodeABI(),
     };
   } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();

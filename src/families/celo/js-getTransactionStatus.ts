@@ -57,7 +57,7 @@ const getTransactionStatus = async (
       errors.amount = new AmountRequired();
     }
   }
-  //TODO: withdraw, activate -> index required?
+  //TODO: withdraw, activate -> index required? throw error if date is too early?
 
   const totalSpent = amount.plus(estimatedFees);
 

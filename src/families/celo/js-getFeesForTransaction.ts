@@ -1,5 +1,6 @@
 import { BigNumber } from "bignumber.js";
-import { Account, Transaction } from "../../types";
+import type { Account } from "../../types";
+import type { Transaction } from "./types";
 import { celoKit } from "./api/sdk";
 
 const FIGMENT_VALIDATOR_GROUP_ADDRESS =
@@ -12,7 +13,7 @@ const getFeesForTransaction = async ({
   account: Account;
   transaction: Transaction;
 }): Promise<BigNumber> => {
-  const { amount } = transaction;
+  const { amount, index } = transaction;
   const kit = celoKit();
 
   // A workaround - estimating gas throws an error if value > funds
@@ -20,7 +21,6 @@ const getFeesForTransaction = async ({
 
   //TODO: needs refactoring?
   if (
-    transaction.family === "celo" &&
     transaction.mode === "unlock" &&
     account.celoResources
   ) {
@@ -34,7 +34,7 @@ const getFeesForTransaction = async ({
   }
 
   let gas;
-  if (transaction.family === "celo" && transaction.mode === "lock") {
+  if (transaction.mode === "lock") {
     const lockedGold = await kit.contracts.getLockedGold();
 
     // TODO: handle relock - pending withdrawals of locked Celo?
@@ -49,27 +49,19 @@ const getFeesForTransaction = async ({
     gas = await lockedGold
       .lock()
       .txo.estimateGas({ from: account.freshAddress, value: value.toFixed() });
-  } else if (transaction.family === "celo" && transaction.mode === "unlock") {
+  } else if (transaction.mode === "unlock") {
     const lockedGold = await kit.contracts.getLockedGold();
 
     gas = await lockedGold
       .unlock(value)
       .txo.estimateGas({ from: account.freshAddress });
-  } else if (transaction.family === "celo" && transaction.mode === "withdraw") {
+  } else if (transaction.mode === "withdraw") {
     const lockedGold = await kit.contracts.getLockedGold();
 
-    //https://github.com/celo-org/celo-monorepo/blob/master/packages/cli/src/commands/lockedgold/withdraw.ts#L31
-    //TODO: check time of withdrawal and if less than current time - withdraw first?
-    const pendingWithdrawals = await lockedGold.getPendingWithdrawals(account.freshAddress);
-    // console.log('pendingWithdrawals', pendingWithdrawals, pendingWithdrawals[0],  pendingWithdrawals[0].value.toFixed(), pendingWithdrawals[0].time)
-
-    //TODO: handle index of pending withdrawal
-    const withdrawalIndex = 0;
-    //TODO: test and add to buildTransaction after withdrawal isn't pending anymore
     gas = await lockedGold
-      .withdraw(withdrawalIndex)
+      .withdraw(index || 0)
       .txo.estimateGas({ from: account.freshAddress });
-  } else if (transaction.family === "celo" && transaction.mode === "vote") {
+  } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();
 
     const vote = await election.vote(
@@ -77,7 +69,7 @@ const getFeesForTransaction = async ({
       new BigNumber(value)
     );
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
-  } else if (transaction.family === "celo" && transaction.mode === "revoke") {
+  } else if (transaction.mode === "revoke") {
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
     const voteSignerAccount = await accounts.voteSignerToAccount(
@@ -99,7 +91,7 @@ const getFeesForTransaction = async ({
     console.log(revoke)
 
     gas = await revoke.txo.estimateGas({ from: account.freshAddress });
-  } else if (transaction.family === "celo" && transaction.mode === "activate") {
+  } else if (transaction.mode === "activate") {
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
     const voteSignerAccount = await accounts.voteSignerToAccount(
@@ -119,7 +111,7 @@ const getFeesForTransaction = async ({
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
 
     gas = await activate.txo.estimateGas({ from: account.freshAddress });
-  } else if (transaction.family === "celo" && transaction.mode === "register") {
+  } else if (transaction.mode === "register") {
     const accounts = await kit.contracts.getAccounts();
 
     gas = await accounts.createAccount().txo.estimateGas({ from: account.freshAddress });
