@@ -3,8 +3,10 @@ import network from "../../../network";
 import { getEnv } from "../../../env";
 import { Operation, OperationType } from "../../../types";
 import { encodeOperationId } from "../../../operation";
+import { CeloValidatorGroup } from "../types";
 
 const DEFAULT_TRANSACTIONS_LIMIT = 200;
+const VALIDATOR_GROUP_COMISSION_RATIO = 10 ** 22;
 const getUrl = (route): string => `${getEnv("API_CELO_INDEXER")}${route || ""}`;
 
 // Indexer returns both account data and transactions in one call.
@@ -26,6 +28,14 @@ const fetchStatus = async () => {
     url: getUrl(`/status`),
   });
   return data;
+};
+
+const fetchValidatorGroups = async () => {
+  const { data } = await network({
+    method: "GET",
+    url: getUrl(`/validator_groups`),
+  });
+  return data.items;
 };
 
 const getOperationType = (type: string): OperationType => {
@@ -105,4 +115,19 @@ export const getAccountDetails = async (address: string, accountId: string) => {
     lockedBalance,
     nonvotingLockedBalance,
   };
+};
+
+export const getValidatorGroups = async (): Promise<CeloValidatorGroup[]> => {
+  const validatorGroups = await fetchValidatorGroups();
+
+  return validatorGroups.map((validatorGroup) => ({
+    address: validatorGroup.address,
+    name: validatorGroup.name || validatorGroup.address,
+    commission: new BigNumber(validatorGroup.commission)
+      .dividedBy(VALIDATOR_GROUP_COMISSION_RATIO)
+      .toNumber(),
+    votes: new BigNumber(validatorGroup.active_votes).plus(
+      new BigNumber(validatorGroup.pending_votes)
+    ),
+  }));
 };
