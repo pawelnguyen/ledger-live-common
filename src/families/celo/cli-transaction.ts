@@ -14,6 +14,11 @@ const options = [
     type: String,
     desc: "mode of transaction: send, lock, unlock, withdraw, vote, revoke, activate, register",
   },
+  {
+    name: "transactionIndex",
+    type: String,
+    desc: "transaction index of a pending withdraw in case of withdraw mode",
+  },
 ];
 
 function inferAccounts(account: Account): AccountLikeArray {
@@ -53,6 +58,7 @@ function inferTransactions(
       ...transaction,
       family: "celo",
       mode,
+      index: opts.transactionIndex || null,
     } as Transaction;
   });
 }
