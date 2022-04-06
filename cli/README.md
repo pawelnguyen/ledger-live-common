@@ -279,6 +279,8 @@ Usage: ledger-live tezosListBakers
 Usage: ledger-live tronSuperRepresentative
      --max <Number>           : max number of super representatives to return
      --format <String>        : json | default
+     
+Usage: ledger-live celoValidatorGroups
 
 Usage: ledger-live validRecipient # Validate a recipient address
  -r, --recipient <String>     : the address to validate

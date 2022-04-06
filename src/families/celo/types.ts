@@ -48,6 +48,15 @@ export type TransactionRaw = TransactionCommonRaw & {
   mode: CeloOperationMode;
   index: number | null | undefined;
 };
+export type CeloValidatorGroup = {
+  address: string;
+  name: string;
+  commission: number;
+  votes: BigNumber;
+};
+export type CeloPreloadData = {
+  validators: CeloValidatorGroup[];
+};
 
 export type CoreStatics = Record<string, never>;
 export type CoreAccountSpecifics = Record<string, never>;

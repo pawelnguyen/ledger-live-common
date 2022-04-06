@@ -7,6 +7,9 @@ import type {
   AccountLike,
   AccountLikeArray,
 } from "../../types";
+import { from } from "rxjs";
+import { map } from "rxjs/operators";
+import { getValidatorGroups } from "../celo/api";
 
 const options = [
   {
@@ -63,8 +66,19 @@ function inferTransactions(
   });
 }
 
+const celoValidatorGroups = {
+  args: [],
+  job: () =>
+    from(getValidatorGroups()).pipe(
+      map((validatorGroup) => JSON.stringify(validatorGroup))
+    ),
+};
+
 export default {
   options,
   inferAccounts,
   inferTransactions,
+  commands: {
+    celoValidatorGroups,
+  },
 };
