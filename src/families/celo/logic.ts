@@ -1,6 +1,8 @@
 import { Account } from "../../types";
 import { CeloPendingWithdrawal } from "./types";
 
+export const PRELOAD_MAX_AGE = 10 * 60 * 1000;
+
 export const availablePendingWithdrawals = (
   account: Account
 ): CeloPendingWithdrawal[] => {

@@ -55,7 +55,7 @@ export type CeloValidatorGroup = {
   votes: BigNumber;
 };
 export type CeloPreloadData = {
-  validators: CeloValidatorGroup[];
+  validatorGroups: CeloValidatorGroup[];
 };
 
 export type CoreStatics = Record<string, never>;
