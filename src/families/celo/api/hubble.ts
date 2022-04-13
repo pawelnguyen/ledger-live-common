@@ -7,6 +7,8 @@ import { CeloValidatorGroup } from "../types";
 
 const DEFAULT_TRANSACTIONS_LIMIT = 200;
 const VALIDATOR_GROUP_COMISSION_RATIO = 10 ** 22;
+const LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS =
+  "0x0861a61Bf679A30680510EcC238ee43B82C5e843";
 const getUrl = (route): string => `${getEnv("API_CELO_INDEXER")}${route || ""}`;
 
 // Indexer returns both account data and transactions in one call.
@@ -120,7 +122,7 @@ export const getAccountDetails = async (address: string, accountId: string) => {
 export const getValidatorGroups = async (): Promise<CeloValidatorGroup[]> => {
   const validatorGroups = await fetchValidatorGroups();
 
-  return validatorGroups.map((validatorGroup) => ({
+  const result = validatorGroups.map((validatorGroup) => ({
     address: validatorGroup.address,
     name: validatorGroup.name || validatorGroup.address,
     commission: new BigNumber(validatorGroup.commission)
@@ -130,4 +132,26 @@ export const getValidatorGroups = async (): Promise<CeloValidatorGroup[]> => {
       new BigNumber(validatorGroup.pending_votes)
     ),
   }));
+  return customValidatorGroupsOrder(result);
+};
+
+const customValidatorGroupsOrder = (validatorGroups): CeloValidatorGroup[] => {
+  let sortedValidatorGroups = validatorGroups.sort((a, b) =>
+    b.votes.minus(a.votes)
+  );
+
+  const defaultValidatorGroup = sortedValidatorGroups.find(
+    (validatorGroup) =>
+      validatorGroup.address === LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS
+  );
+
+  if (defaultValidatorGroup) {
+    sortedValidatorGroups = sortedValidatorGroups.filter(
+      (validatorGroup) =>
+        validatorGroup.address != LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS
+    );
+    sortedValidatorGroups.unshift(defaultValidatorGroup);
+  }
+
+  return sortedValidatorGroups;
 };
