@@ -3,9 +3,6 @@ import type { Account } from "../../types";
 import type { Transaction } from "./types";
 import { celoKit } from "./api/sdk";
 
-const FIGMENT_VALIDATOR_GROUP_ADDRESS =
-  "0x01b2b83fDf26aFC3Ca7062C35Bc68c8DdE56dB04";
-
 const getFeesForTransaction = async ({
   account,
   transaction,
@@ -21,7 +18,7 @@ const getFeesForTransaction = async ({
 
   //TODO: needs refactoring?
   if (
-    transaction.mode === "unlock" &&
+    (transaction.mode === "unlock" || transaction.mode === "vote") &&
     account.celoResources
   ) {
     value = transaction.useAllAmount
@@ -64,11 +61,15 @@ const getFeesForTransaction = async ({
   } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();
 
+    console.log('vote fees', transaction, value)
     const vote = await election.vote(
-      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      transaction.recipient,
       new BigNumber(value)
     );
+
+    console.log('before vote fees', transaction, value)
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
+    console.log('after fees', vote, gas)
   } else if (transaction.mode === "revoke") {
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
@@ -78,7 +79,7 @@ const getFeesForTransaction = async ({
 
     const revokes = await election.revoke(
       voteSignerAccount,
-      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      transaction.recipient,
       new BigNumber(value)
     );
 

@@ -34,7 +34,10 @@ const getTransactionStatus = async (
   const estimatedFees = transaction.fees || new BigNumber(0);
 
   let amount;
-  if (useAllAmount && transaction.mode === "unlock") {
+  if (
+    useAllAmount &&
+    (transaction.mode === "unlock" || transaction.mode === "vote")
+  ) {
     amount = account.celoResources?.nonvotingLockedBalance ?? new BigNumber(0);
   } else if (useAllAmount) {
     amount = account.spendableBalance.minus(estimatedFees);
@@ -61,7 +64,7 @@ const getTransactionStatus = async (
 
   const totalSpent = amount.plus(estimatedFees);
 
-  if (transaction.mode === "unlock") {
+  if (transaction.mode === "unlock" || transaction.mode === "vote") {
     if (amount.gt(account.celoResources?.nonvotingLockedBalance)) {
       errors.amount = new NotEnoughBalance();
     }

@@ -4,10 +4,6 @@ import { CeloTx } from "@celo/connect";
 import { celoKit } from "./api/sdk";
 import { BigNumber } from "bignumber.js";
 
-//DRY, extract to constants
-const FIGMENT_VALIDATOR_GROUP_ADDRESS =
-  "0x01b2b83fDf26aFC3Ca7062C35Bc68c8DdE56dB04";
-
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
   const { amount, index } = transaction;
@@ -15,7 +11,10 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
   let value;
 
   //TODO: needs refactoring?
-  if (transaction.mode === "unlock" && account.celoResources) {
+  if (
+    (transaction.mode === "unlock" || transaction.mode === "vote") &&
+    account.celoResources
+  ) {
     value = transaction.useAllAmount
       ? account.celoResources.nonvotingLockedBalance
       : amount;
@@ -53,7 +52,7 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
   } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();
     const vote = await election.vote(
-      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      transaction.recipient,
       new BigNumber(value)
     );
 
@@ -71,7 +70,7 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
 
     const revokes = await election.revoke(
       voteSignerAccount,
-      FIGMENT_VALIDATOR_GROUP_ADDRESS,
+      transaction.recipient,
       new BigNumber(value)
     );
     const revoke = revokes.pop();
