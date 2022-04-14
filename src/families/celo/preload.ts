@@ -15,7 +15,6 @@ function fromHydrateValidator(
   return {
     address: validatorGroupRaw.address,
     name: validatorGroupRaw.name,
-    commission: validatorGroupRaw.commission,
     votes: new BigNumber(validatorGroupRaw.votes),
   };
 }

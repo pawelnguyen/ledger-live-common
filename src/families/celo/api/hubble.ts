@@ -6,8 +6,7 @@ import { encodeOperationId } from "../../../operation";
 import { CeloValidatorGroup } from "../types";
 
 const DEFAULT_TRANSACTIONS_LIMIT = 200;
-const VALIDATOR_GROUP_COMISSION_RATIO = 10 ** 22;
-const LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS =
+export const LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS =
   "0x0861a61Bf679A30680510EcC238ee43B82C5e843";
 const getUrl = (route): string => `${getEnv("API_CELO_INDEXER")}${route || ""}`;
 
@@ -125,9 +124,6 @@ export const getValidatorGroups = async (): Promise<CeloValidatorGroup[]> => {
   const result = validatorGroups.map((validatorGroup) => ({
     address: validatorGroup.address,
     name: validatorGroup.name || validatorGroup.address,
-    commission: new BigNumber(validatorGroup.commission)
-      .dividedBy(VALIDATOR_GROUP_COMISSION_RATIO)
-      .toNumber(),
     votes: new BigNumber(validatorGroup.active_votes).plus(
       new BigNumber(validatorGroup.pending_votes)
     ),
