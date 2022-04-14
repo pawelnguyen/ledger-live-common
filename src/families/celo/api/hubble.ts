@@ -4,10 +4,9 @@ import { getEnv } from "../../../env";
 import { Operation, OperationType } from "../../../types";
 import { encodeOperationId } from "../../../operation";
 import { CeloValidatorGroup } from "../types";
+import { isDefaultValidatorGroup } from "../logic";
 
 const DEFAULT_TRANSACTIONS_LIMIT = 200;
-export const LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS =
-  "0x0861a61Bf679A30680510EcC238ee43B82C5e843";
 const getUrl = (route): string => `${getEnv("API_CELO_INDEXER")}${route || ""}`;
 
 // Indexer returns both account data and transactions in one call.
@@ -137,14 +136,12 @@ const customValidatorGroupsOrder = (validatorGroups): CeloValidatorGroup[] => {
   );
 
   const defaultValidatorGroup = sortedValidatorGroups.find(
-    (validatorGroup) =>
-      validatorGroup.address === LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS
+    isDefaultValidatorGroup
   );
 
   if (defaultValidatorGroup) {
     sortedValidatorGroups = sortedValidatorGroups.filter(
-      (validatorGroup) =>
-        validatorGroup.address != LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS
+      (validatorGroup) => !isDefaultValidatorGroup(validatorGroup)
     );
     sortedValidatorGroups.unshift(defaultValidatorGroup);
   }
