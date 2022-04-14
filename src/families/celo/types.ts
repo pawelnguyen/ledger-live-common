@@ -51,7 +51,6 @@ export type TransactionRaw = TransactionCommonRaw & {
 export type CeloValidatorGroup = {
   address: string;
   name: string;
-  commission: number;
   votes: BigNumber;
 };
 export type CeloPreloadData = {
