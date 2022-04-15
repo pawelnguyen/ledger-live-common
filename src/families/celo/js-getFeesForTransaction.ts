@@ -34,15 +34,6 @@ const getFeesForTransaction = async ({
   if (transaction.mode === "lock") {
     const lockedGold = await kit.contracts.getLockedGold();
 
-    // TODO: handle relock - pending withdrawals of locked Celo?
-    // const pendingWithdrawalsValue = await lockedGold.getPendingWithdrawalsTotalValue(address)
-    // const relockValue = BigNumber.minimum(pendingWithdrawalsValue, value)
-    // const lockValue = value.minus(relockValue)
-
-    //TODO: estimateGasWithInflationFactor instead?
-    // TODO: min amount?
-    //https://github.com/celo-tools/celo-web-wallet/blob/9ae0dbea6606644a8188da414602d4fbffc3967d/src/consts.ts#L34
-
     gas = await lockedGold
       .lock()
       .txo.estimateGas({ from: account.freshAddress, value: value.toFixed() });
@@ -61,15 +52,12 @@ const getFeesForTransaction = async ({
   } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();
 
-    console.log('vote fees', transaction, value)
     const vote = await election.vote(
       transaction.recipient,
       new BigNumber(value)
     );
 
-    console.log('before vote fees', transaction, value)
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
-    console.log('after fees', vote, gas)
   } else if (transaction.mode === "revoke") {
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
@@ -115,7 +103,9 @@ const getFeesForTransaction = async ({
   } else if (transaction.mode === "register") {
     const accounts = await kit.contracts.getAccounts();
 
-    gas = await accounts.createAccount().txo.estimateGas({ from: account.freshAddress });
+    gas = await accounts
+      .createAccount()
+      .txo.estimateGas({ from: account.freshAddress });
   } else {
     //TODO: check sending
     const celoToken = await kit.contracts.getGoldToken();
