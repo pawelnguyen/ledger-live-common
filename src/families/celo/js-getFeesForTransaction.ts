@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
 import type { Account } from "../../types";
 import type { Transaction } from "./types";
-import { celoKit } from "./api/sdk";
+import { celoKit, getPendingVotes, getVotes } from "./api/sdk";
 
 const getFeesForTransaction = async ({
   account,
@@ -87,17 +87,23 @@ const getFeesForTransaction = async ({
       account.freshAddress
     );
 
-    //TODO: check if has pending votes -> in getTransactionStatus?
-    const hasPendingVotes = await election.hasPendingVotes(voteSignerAccount);
-    const hasActivatable = await election.hasActivatablePendingVotes(
-      voteSignerAccount
-    );
-
     const activates = await election.activate(voteSignerAccount);
-    //TODO: activate returns an array
-    //find activates only for Figment validator group
-    const activate = activates.pop();
+
+    //TODO: use to fetch amount and display in UI
+    const votes = await getVotes(account.freshAddress)
+
+    // console.log('getVotes', votes)
+    // console.log('getVotes', votes, votes[1].pending)
+    // console.log('activates', activates)
+
+    // TODO: find activates via recipient, filter by txo.arguments[0]
+    const activate = activates[0];
+    console.log('activate', activate)
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
+
+
+    const pendingVotes = await getPendingVotes(account.freshAddress)
+    console.log('pendingVotes', pendingVotes)
 
     gas = await activate.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "register") {
