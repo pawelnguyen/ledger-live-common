@@ -92,13 +92,9 @@ const getFeesForTransaction = async ({
     //TODO: use to fetch amount and display in UI
     const votes = await getVotes(account.freshAddress)
 
-    // console.log('getVotes', votes)
-    // console.log('getVotes', votes, votes[1].pending)
-    // console.log('activates', activates)
-
     // TODO: find activates via recipient, filter by txo.arguments[0]
     const activate = activates[0];
-    console.log('activate', activate)
+    console.log('activates', activates)
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
 
 
