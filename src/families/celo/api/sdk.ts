@@ -1,5 +1,6 @@
 import { ContractKit, newKit } from "@celo/contractkit";
 import { getEnv } from "../../../env";
+import { CeloVote } from "../types";
 
 let kit: ContractKit;
 export const celoKit = () => {
@@ -10,7 +11,7 @@ export const celoKit = () => {
 /**
  * Fetch account registered status. To lock any Celo, account needs to be registered first
  */
-export const getAccountRegistrationStatus = async (address: string) => {
+export const getAccountRegistrationStatus = async (address: string): Promise<boolean> => {
   const accounts = await celoKit().contracts.getAccounts();
   return await accounts.isAccount(address);
 };
@@ -28,41 +29,23 @@ export const getPendingWithdrawals = async (address: string) => {
   return pendingWithdrawalsWithIndexes;
 };
 
-
-// getVotes [
-//   {
-//     group: '0x01b2b83fDf26aFC3Ca7062C35Bc68c8DdE56dB04',
-//     pending: BigNumber { s: 1, e: 16, c: [Array] },
-// active: BigNumber { s: 1, e: 0, c: [Array] },
-// index: 0
-// },
-// {
-//   group: '0x0861a61Bf679A30680510EcC238ee43B82C5e843',
-//     pending: BigNumber { s: 1, e: 16, c: [Array] },
-//   active: BigNumber { s: 1, e: 0, c: [Array] },
-//   index: 1
-// }
-// ]
-
-export const getVotes = async (address: string) => {
+export const getVotes = async (address: string): Promise<CeloVote[]> => {
   const election = await celoKit().contracts.getElection();
   const voter = await election.getVoter(await voteSignerAccount(address))
-  return voter.votes;
+  const activates = await getActivateTransactionObjects(address);
+  const activatableValidatorGroups = activates.map((activate) => activate.txo.arguments[0])
+  return voter.votes.map((vote) => ({
+    validatorGroup: vote.group,
+    pendingAmount: vote.pending,
+    activeAmount: vote.active,
+    activatable: activatableValidatorGroups.includes(vote.group),
+  }));
 };
 
-export const getVoteActivates = async (address: string) => {
+export const getActivateTransactionObjects = async (address: string) => {
   const election = await celoKit().contracts.getElection();
   return await election.activate(await voteSignerAccount(address));
 };
-
-export const getPendingVotes = async (address: string) => {
-  const votes = await getVotes(address);
-  const activates = await getVoteActivates(address);
-
-  return activates.map((activate) =>
-    votes.find((vote) => vote.group === activate.txo.arguments[0])
-  )
-}
 
 // TODO: fetch in sync, to enable/disable vote button
 // const hasPendingVotes = await election.hasPendingVotes(voteSignerAccount);
@@ -70,7 +53,8 @@ export const getPendingVotes = async (address: string) => {
 //   voteSignerAccount
 // );
 
-const voteSignerAccount = async (address: string) => {
+// TODO: cache?
+const voteSignerAccount = async (address: string): Promise<string> => {
   const accounts = await celoKit().contracts.getAccounts();
   return await accounts.voteSignerToAccount(address);
 }

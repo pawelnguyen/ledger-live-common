@@ -8,21 +8,28 @@ export function toCeloResourcesRaw(r: CeloResources): CeloResourcesRaw {
     lockedBalance,
     nonvotingLockedBalance,
     pendingWithdrawals,
+    votes,
   } = r;
   return {
     registrationStatus,
     lockedBalance: lockedBalance.toString(),
     nonvotingLockedBalance: nonvotingLockedBalance.toString(),
-    pendingWithdrawals: pendingWithdrawals?.map((u) => ({
-      value: u.value.toString(),
-      time: u.time.toString(),
-      index: u.index.toString(),
+    pendingWithdrawals: pendingWithdrawals?.map((withdrawal) => ({
+      value: withdrawal.value.toString(),
+      time: withdrawal.time.toString(),
+      index: withdrawal.index.toString(),
+    })),
+    votes: votes?.map((vote) => ({
+      validatorGroup: vote.validatorGroup.toString(),
+      pendingAmount: vote.pendingAmount.toString(),
+      activeAmount: vote.activeAmount.toString(),
+      activatable: vote.activatable,
     })),
   };
 }
 
 export function fromCeloResourcesRaw(r: CeloResourcesRaw): CeloResources {
-  const { registrationStatus, lockedBalance, nonvotingLockedBalance } = r;
+  const { registrationStatus, lockedBalance, nonvotingLockedBalance, votes } = r;
   return {
     registrationStatus,
     lockedBalance: new BigNumber(lockedBalance),
@@ -31,6 +38,12 @@ export function fromCeloResourcesRaw(r: CeloResourcesRaw): CeloResources {
       value: new BigNumber(u.value),
       time: new BigNumber(u.time),
       index: Number(u.index),
+    })),
+    votes: votes?.map((vote) => ({
+      validatorGroup: vote.validatorGroup,
+      pendingAmount: new BigNumber(vote.pendingAmount),
+      activeAmount: new BigNumber(vote.activeAmount),
+      activatable: vote.activatable,
     })),
   };
 }

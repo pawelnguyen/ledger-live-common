@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
 import type { Account } from "../../types";
 import type { Transaction } from "./types";
-import { celoKit, getPendingVotes, getVotes } from "./api/sdk";
+import { celoKit, getVotes } from "./api/sdk";
 
 const getFeesForTransaction = async ({
   account,
@@ -89,17 +89,8 @@ const getFeesForTransaction = async ({
 
     const activates = await election.activate(voteSignerAccount);
 
-    //TODO: use to fetch amount and display in UI
-    const votes = await getVotes(account.freshAddress)
-
-    // TODO: find activates via recipient, filter by txo.arguments[0]
-    const activate = activates[0];
-    console.log('activates', activates)
+    const activate = activates.find((a) => a.txo.arguments[0] === transaction.recipient);
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
-
-
-    const pendingVotes = await getPendingVotes(account.freshAddress)
-    console.log('pendingVotes', pendingVotes)
 
     gas = await activate.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "register") {
