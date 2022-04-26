@@ -35,7 +35,7 @@ const getAccountShape: GetAccountShape = async (info) => {
     ? await getPendingWithdrawals(address)
     : [];
 
-  const votes = await getVotes(address);
+  const votes = accountRegistrationStatus ? await getVotes(address) : [];
 
   const operations = mergeOps(oldOperations, newOperations);
   const shape = {

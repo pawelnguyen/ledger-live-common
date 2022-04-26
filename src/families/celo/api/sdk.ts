@@ -31,9 +31,11 @@ export const getPendingWithdrawals = async (address: string) => {
 
 export const getVotes = async (address: string): Promise<CeloVote[]> => {
   const election = await celoKit().contracts.getElection();
-  const voter = await election.getVoter(await voteSignerAccount(address))
+  const voter = await election.getVoter(await voteSignerAccount(address));
   const activates = await getActivateTransactionObjects(address);
-  const activatableValidatorGroups = activates.map((activate) => activate.txo.arguments[0])
+  const activatableValidatorGroups = activates.map(
+    (activate) => activate.txo.arguments[0]
+  );
   return voter.votes.map((vote) => ({
     validatorGroup: vote.group,
     pendingAmount: vote.pending,

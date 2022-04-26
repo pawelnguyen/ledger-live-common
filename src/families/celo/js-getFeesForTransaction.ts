@@ -89,7 +89,9 @@ const getFeesForTransaction = async ({
 
     const activates = await election.activate(voteSignerAccount);
 
-    const activate = activates.find((a) => a.txo.arguments[0] === transaction.recipient);
+    const activate = activates.find(
+      (a) => a.txo.arguments[0] === transaction.recipient
+    );
     if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
 
     gas = await activate.txo.estimateGas({ from: account.freshAddress });
