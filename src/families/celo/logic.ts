@@ -1,5 +1,5 @@
 import { Account } from "../../types";
-import { CeloPendingWithdrawal, CeloValidatorGroup } from "./types";
+import { CeloPendingWithdrawal, CeloValidatorGroup, CeloVote } from "./types";
 
 export const PRELOAD_MAX_AGE = 10 * 60 * 1000;
 export const LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS =
@@ -21,3 +21,9 @@ export const isDefaultValidatorGroupAddress = (address: string): boolean =>
 export const isDefaultValidatorGroup = (
   validatorGroup: CeloValidatorGroup
 ): boolean => isDefaultValidatorGroupAddress(validatorGroup.address);
+
+export const activatableVotes = (account: Account): CeloVote[] => {
+  const { votes } = account.celoResources || {};
+
+  return (votes || []).filter((vote) => vote.activatable);
+};

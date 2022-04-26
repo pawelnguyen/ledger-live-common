@@ -49,14 +49,8 @@ export const getActivateTransactionObjects = async (address: string) => {
   return await election.activate(await voteSignerAccount(address));
 };
 
-// TODO: fetch in sync, to enable/disable vote button
-// const hasPendingVotes = await election.hasPendingVotes(voteSignerAccount);
-// const hasActivatable = await election.hasActivatablePendingVotes(
-//   voteSignerAccount
-// );
-
 // TODO: cache?
 const voteSignerAccount = async (address: string): Promise<string> => {
   const accounts = await celoKit().contracts.getAccounts();
   return await accounts.voteSignerToAccount(address);
-}
+};
