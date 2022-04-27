@@ -4,6 +4,8 @@ import { CeloTx } from "@celo/connect";
 import { celoKit } from "./api/sdk";
 import { BigNumber } from "bignumber.js";
 
+// TODO: a lot of this code overlaps with getFeesForTransaction, but not all. Check if passing an extracted
+// celoTransaction from here to getFees estimateGas would work
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
 
