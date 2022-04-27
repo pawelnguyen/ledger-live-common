@@ -6,23 +6,8 @@ import { BigNumber } from "bignumber.js";
 
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
-  const { amount, index } = transaction;
 
-  let value;
-
-  //TODO: needs refactoring?
-  if (
-    (transaction.mode === "unlock" || transaction.mode === "vote") &&
-    account.celoResources
-  ) {
-    value = transaction.useAllAmount
-      ? account.celoResources.nonvotingLockedBalance
-      : amount;
-  } else {
-    value = transaction.useAllAmount
-      ? account.spendableBalance.minus(transaction.fees || 0)
-      : amount;
-  }
+  const value = transactionValue(account, transaction);
 
   let celoTransaction: CeloTx;
 
@@ -47,7 +32,7 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
     celoTransaction = {
       from: account.freshAddress,
       to: lockedGold.address,
-      data: await lockedGold.withdraw(index || 0).txo.encodeABI(),
+      data: lockedGold.withdraw(transaction.index || 0).txo.encodeABI(),
     };
   } else if (transaction.mode === "vote") {
     const election = await kit.contracts.getElection();
@@ -126,6 +111,26 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
     gas: await kit.connection.estimateGasWithInflationFactor(celoTransaction),
     gasPrice: await kit.connection.gasPrice(),
   } as CeloTx;
+};
+
+const transactionValue = (
+  account: Account,
+  transaction: Transaction
+): BigNumber => {
+  let value = transaction.amount;
+
+  if (transaction.useAllAmount) {
+    if (
+      (transaction.mode === "unlock" || transaction.mode === "vote") &&
+      account.celoResources
+    ) {
+      value = account.celoResources.nonvotingLockedBalance;
+    } else {
+      value = account.spendableBalance.minus(transaction.fees || 0);
+    }
+  }
+
+  return value;
 };
 
 export default buildTransaction;
