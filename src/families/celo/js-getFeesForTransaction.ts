@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
 import type { Account } from "../../types";
 import type { Transaction } from "./types";
-import { celoKit, getVotes } from "./api/sdk";
+import { celoKit } from "./api/sdk";
 
 const getFeesForTransaction = async ({
   account,
@@ -16,7 +16,7 @@ const getFeesForTransaction = async ({
   // A workaround - estimating gas throws an error if value > funds
   let value;
 
-  //TODO: needs refactoring?
+  //TODO: needs refactoring? DRY with js-buildTransaction, pass an amount for minimum?
   if (
     (transaction.mode === "unlock" || transaction.mode === "vote") &&
     account.celoResources

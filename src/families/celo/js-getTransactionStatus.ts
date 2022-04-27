@@ -54,8 +54,7 @@ const getTransactionStatus = async (
     warnings.amount = new CeloAllFundsWarning();
   }
 
-  //TODO: in [] instead
-  if (transaction.mode != "register" && transaction.mode != "withdraw" && transaction.mode != "activate") {
+  if (!["register", "withdraw", "activate"].includes(transaction.mode)) {
     if (amount.lte(0) && !useAllAmount) {
       errors.amount = new AmountRequired();
     }
