@@ -1,6 +1,7 @@
 import { ContractKit, newKit } from "@celo/contractkit";
 import { getEnv } from "../../../env";
 import { CeloVote } from "../types";
+import { makeLRUCache } from "../../../cache";
 
 let kit: ContractKit;
 export const celoKit = () => {
@@ -16,7 +17,9 @@ export const getAccountRegistrationStatus = async (address: string): Promise<boo
   return await accounts.isAccount(address);
 };
 
-//TODO: desc, types
+/**
+ * Fetch pending withdrawals, with an index
+ */
 export const getPendingWithdrawals = async (address: string) => {
   const lockedGold = await celoKit().contracts.getLockedGold();
   const pendingWithdrawals = await lockedGold.getPendingWithdrawals(address);
@@ -29,6 +32,9 @@ export const getPendingWithdrawals = async (address: string) => {
   return pendingWithdrawalsWithIndexes;
 };
 
+/**
+ * Fetch all votes, with an `activatable` flag for votes that can be activated
+ */
 export const getVotes = async (address: string): Promise<CeloVote[]> => {
   const election = await celoKit().contracts.getElection();
   const voter = await election.getVoter(await voteSignerAccount(address));
@@ -44,13 +50,21 @@ export const getVotes = async (address: string): Promise<CeloVote[]> => {
   }));
 };
 
-export const getActivateTransactionObjects = async (address: string) => {
+const getActivateTransactionObjects = async (address: string) => {
   const election = await celoKit().contracts.getElection();
   return await election.activate(await voteSignerAccount(address));
 };
 
-// TODO: cache?
-const voteSignerAccount = async (address: string): Promise<string> => {
-  const accounts = await celoKit().contracts.getAccounts();
-  return await accounts.voteSignerToAccount(address);
-};
+/**
+ * Fetch and cache address of a vote signer account
+ */
+export const voteSignerAccount = makeLRUCache(
+  async (address: string): Promise<string> => {
+    const accounts = await celoKit().contracts.getAccounts();
+    return await accounts.voteSignerToAccount(address);
+  },
+  (address) => address,
+  {
+    maxAge: 60 * 60 * 1000, // 1 hour
+  }
+);
