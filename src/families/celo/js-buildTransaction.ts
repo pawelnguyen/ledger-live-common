@@ -89,7 +89,9 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
     );
 
     const activates = await election.activate(voteSignerAccount);
-    const activate = activates.pop();
+    const activate = activates.find(
+      (a) => a.txo.arguments[0] === transaction.recipient
+    );
     if (!activate) throw new Error("No votes to activate");
 
     celoTransaction = {

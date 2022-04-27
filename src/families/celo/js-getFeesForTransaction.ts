@@ -92,7 +92,7 @@ const getFeesForTransaction = async ({
     const activate = activates.find(
       (a) => a.txo.arguments[0] === transaction.recipient
     );
-    if (!activate) return new BigNumber(0); //throw error instead? or should be thrown in diff place?
+    if (!activate) return new BigNumber(0);
 
     gas = await activate.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "register") {
