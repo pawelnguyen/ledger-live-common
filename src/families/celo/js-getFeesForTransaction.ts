@@ -71,13 +71,16 @@ const getFeesForTransaction = async ({
       new BigNumber(value)
     );
 
-    console.log('revokes', revokes)
-
-    //TODO: revoke returns an array with revokes for each validator group voted. find revokes for Figment validator group
-    const revoke = revokes.pop();
+    // TODO: refactor, extract?
+    const revoke = revokes.find((transactionObject) => {
+      //TODO double check 'revokeActive'
+      return (transactionObject.txo as any)._method.name ===
+        (transaction.index === 0)
+        ? "revokePending"
+        : "revokeActive";
+    });
+    console.log('revoke', revoke);
     if (!revoke) return new BigNumber(0);
-
-    console.log(revoke)
 
     gas = await revoke.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "activate") {
