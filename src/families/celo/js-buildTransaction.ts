@@ -60,7 +60,16 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       transaction.recipient,
       new BigNumber(value)
     );
-    const revoke = revokes.pop();
+
+    // TODO: refactor, extract?
+    const revoke = revokes.find((transactionObject) => {
+      //TODO double check 'revokeActive'
+      return (transactionObject.txo as any)._method.name ===
+        (transaction.index === 0)
+        ? "revokePending"
+        : "revokeActive";
+    });
+    console.log('revoke', revoke);
     if (!revoke) throw new Error("No votes to revoke");
 
     celoTransaction = {
