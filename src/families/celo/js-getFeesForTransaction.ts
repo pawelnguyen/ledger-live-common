@@ -71,15 +71,17 @@ const getFeesForTransaction = async ({
       new BigNumber(value)
     );
 
+    console.log('transaction fees', transaction)
+
     // TODO: refactor, extract?
     const revoke = revokes.find((transactionObject) => {
       //TODO double check 'revokeActive'
-      return (transactionObject.txo as any)._method.name ===
-        (transaction.index === 0)
-        ? "revokePending"
-        : "revokeActive";
+      return (
+        (transactionObject.txo as any)._method.name ===
+        (transaction.index === 0 ? "revokePending" : "revokeActive")
+      );
     });
-    console.log('revoke', revoke);
+    console.log('revoke fees', revoke);
     if (!revoke) return new BigNumber(0);
 
     gas = await revoke.txo.estimateGas({ from: account.freshAddress });

@@ -61,15 +61,19 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       new BigNumber(value)
     );
 
+    console.log('all revokes', revokes)
+
+    console.log('transaction build', transaction)
+    console.log('transaction.index', transaction.index, transaction.index === 0)
     // TODO: refactor, extract?
     const revoke = revokes.find((transactionObject) => {
       //TODO double check 'revokeActive'
-      return (transactionObject.txo as any)._method.name ===
-        (transaction.index === 0)
-        ? "revokePending"
-        : "revokeActive";
+      return (
+        (transactionObject.txo as any)._method.name ===
+        (transaction.index === 0 ? "revokePending" : "revokeActive")
+      );
     });
-    console.log('revoke', revoke);
+    console.log('revoke build', revoke);
     if (!revoke) throw new Error("No votes to revoke");
 
     celoTransaction = {
