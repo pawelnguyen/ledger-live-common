@@ -11,6 +11,7 @@ import {
 import { BigNumber } from "bignumber.js";
 import { isValidAddress } from "@celo/utils/lib/address";
 import { CeloAllFundsWarning } from "./errors";
+import { getRevoke } from "./logic";
 
 // Arbitrary buffer for paying fees of next transactions. 0.05 Celo for ~100 transactions
 const FEES_SAFETY_BUFFER = new BigNumber(5000000000000000);
@@ -39,12 +40,18 @@ const getTransactionStatus = async (
     (transaction.mode === "unlock" || transaction.mode === "vote")
   ) {
     amount = account.celoResources?.nonvotingLockedBalance ?? new BigNumber(0);
+  } else if (useAllAmount && transaction.mode === "revoke") {
+    const revoke = getRevoke(account, transaction.recipient, transaction.index);
+    if (revoke?.amount) amount = revoke.amount;
   } else if (useAllAmount) {
     amount = account.spendableBalance.minus(estimatedFees);
     if (transaction.mode === "lock") amount = amount.minus(FEES_SAFETY_BUFFER);
   } else {
     amount = new BigNumber(transaction.amount);
   }
+
+  //TODO: refactor?
+
   if (amount.lt(0)) amount = new BigNumber(0);
 
   if (
