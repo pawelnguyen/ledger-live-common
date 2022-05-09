@@ -2,6 +2,7 @@ import { BigNumber } from "bignumber.js";
 import type { Account } from "../../types";
 import type { Transaction } from "./types";
 import { celoKit } from "./api/sdk";
+import { getRevoke } from "./logic";
 
 const getFeesForTransaction = async ({
   account,
@@ -16,7 +17,7 @@ const getFeesForTransaction = async ({
   // A workaround - estimating gas throws an error if value > funds
   let value;
 
-  //TODO: needs refactoring? DRY with js-buildTransaction, pass an amount for minimum?
+  //TODO: needs refactoring? DRY with js-buildTransaction/getTransactionStatus, pass an amount for minimum?
   if (
     (transaction.mode === "unlock" || transaction.mode === "vote") &&
     account.celoResources
@@ -59,13 +60,24 @@ const getFeesForTransaction = async ({
 
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "revoke") {
+    if (transaction.useAllAmount) {
+      const revoke = getRevoke(
+        account,
+        transaction.recipient,
+        transaction.index
+      );
+      if (revoke?.amount) value = revoke.amount;
+    }
+
+    console.log('before revokes1', transaction)
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
     const voteSignerAccount = await accounts.voteSignerToAccount(
       account.freshAddress
     );
+    console.log('before revokes', transaction)
 
-    const revokes = await election.revoke(
+    const revokeTxs = await election.revoke(
       voteSignerAccount,
       transaction.recipient,
       new BigNumber(value)
@@ -74,17 +86,17 @@ const getFeesForTransaction = async ({
     console.log('transaction fees', transaction)
 
     // TODO: refactor, extract?
-    const revoke = revokes.find((transactionObject) => {
+    const revokeTx = revokeTxs.find((transactionObject) => {
       //TODO double check 'revokeActive'
       return (
         (transactionObject.txo as any)._method.name ===
         (transaction.index === 0 ? "revokePending" : "revokeActive")
       );
     });
-    console.log('revoke fees', revoke);
-    if (!revoke) return new BigNumber(0);
+    console.log('revoke fees', revokeTx);
+    if (!revokeTx) return new BigNumber(0);
 
-    gas = await revoke.txo.estimateGas({ from: account.freshAddress });
+    gas = await revokeTx.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "activate") {
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();

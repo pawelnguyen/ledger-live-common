@@ -67,6 +67,12 @@ export type CeloVoteRaw = {
   activeAmount: string;
   activatable: boolean;
 };
+export type CeloRevoke = {
+  validatorGroup: string;
+  index: number;
+  amount: BigNumber;
+  activeStatus: boolean;
+};
 export type CeloPreloadData = {
   validatorGroups: CeloValidatorGroup[];
 };
