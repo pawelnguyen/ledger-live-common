@@ -69,31 +69,24 @@ const getFeesForTransaction = async ({
       if (revoke?.amount) value = revoke.amount;
     }
 
-    console.log('before revokes1', transaction)
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
     const voteSignerAccount = await accounts.voteSignerToAccount(
       account.freshAddress
     );
-    console.log('before revokes', transaction)
-
     const revokeTxs = await election.revoke(
       voteSignerAccount,
       transaction.recipient,
       new BigNumber(value)
     );
 
-    console.log('transaction fees', transaction)
-
     // TODO: refactor, extract?
     const revokeTx = revokeTxs.find((transactionObject) => {
-      //TODO double check 'revokeActive'
       return (
         (transactionObject.txo as any)._method.name ===
         (transaction.index === 0 ? "revokePending" : "revokeActive")
       );
     });
-    console.log('revoke fees', revokeTx);
     if (!revokeTx) return new BigNumber(0);
 
     gas = await revokeTx.txo.estimateGas({ from: account.freshAddress });

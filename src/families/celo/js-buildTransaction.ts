@@ -3,12 +3,14 @@ import type { Account } from "../../types";
 import { CeloTx } from "@celo/connect";
 import { celoKit } from "./api/sdk";
 import { BigNumber } from "bignumber.js";
+import { getRevoke } from "./logic";
 
 // TODO: a lot of this code overlaps with getFeesForTransaction, but not all. Check if passing an extracted
 // celoTransaction from here to getFees estimateGas would work
 const buildTransaction = async (account: Account, transaction: Transaction) => {
   const kit = celoKit();
 
+  //TODO: reuse
   const value = transactionValue(account, transaction);
 
   let celoTransaction: CeloTx;
@@ -61,19 +63,13 @@ const buildTransaction = async (account: Account, transaction: Transaction) => {
       new BigNumber(value)
     );
 
-    console.log('all revokes', revokes)
-
-    console.log('transaction build', transaction)
-    console.log('transaction.index', transaction.index, transaction.index === 0)
     // TODO: refactor, extract?
     const revoke = revokes.find((transactionObject) => {
-      //TODO double check 'revokeActive'
       return (
         (transactionObject.txo as any)._method.name ===
         (transaction.index === 0 ? "revokePending" : "revokeActive")
       );
     });
-    console.log('revoke build', revoke);
     if (!revoke) throw new Error("No votes to revoke");
 
     celoTransaction = {
@@ -140,6 +136,13 @@ const transactionValue = (
       account.celoResources
     ) {
       value = account.celoResources.nonvotingLockedBalance;
+    } else if (transaction.mode === "revoke" && account.celoResources) {
+      const revoke = getRevoke(
+        account,
+        transaction.recipient,
+        transaction.index
+      );
+      if (revoke?.amount) value = revoke.amount;
     } else {
       value = account.spendableBalance.minus(transaction.fees || 0);
     }
