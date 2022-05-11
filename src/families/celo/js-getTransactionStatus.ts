@@ -73,6 +73,11 @@ const getTransactionStatus = async (
     if (amount.gt(account.celoResources?.nonvotingLockedBalance)) {
       errors.amount = new NotEnoughBalance();
     }
+  } else if (transaction.mode === "revoke") {
+    //TODO: refactor, we fetch votes twice
+    const revoke = getVote(account, transaction.recipient, transaction.index);
+    if (revoke?.amount && amount.gt(revoke.amount))
+      errors.amount = new NotEnoughBalance();
   } else {
     if (totalSpent.gt(account.spendableBalance)) {
       errors.amount = new NotEnoughBalance();
