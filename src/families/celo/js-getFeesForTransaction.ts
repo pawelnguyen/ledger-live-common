@@ -25,6 +25,13 @@ const getFeesForTransaction = async ({
     value = transaction.useAllAmount
       ? account.celoResources.nonvotingLockedBalance
       : BigNumber.minimum(amount, account.celoResources.nonvotingLockedBalance);
+  } else if (transaction.mode === "revoke" && account.celoResources) {
+    const vote = getVote(account, transaction.recipient, transaction.index);
+    if (vote) {
+      value = transaction.useAllAmount
+        ? vote.amount
+        : BigNumber.minimum(amount, vote.amount);
+    }
   } else {
     value = transaction.useAllAmount
       ? account.spendableBalance
@@ -60,11 +67,6 @@ const getFeesForTransaction = async ({
 
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "revoke") {
-    if (transaction.useAllAmount) {
-      const revoke = getVote(account, transaction.recipient, transaction.index);
-      if (revoke?.amount) value = revoke.amount;
-    }
-
     const election = await kit.contracts.getElection();
     const accounts = await kit.contracts.getAccounts();
     const voteSignerAccount = await accounts.voteSignerToAccount(
