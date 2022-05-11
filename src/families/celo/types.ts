@@ -14,6 +14,8 @@ export type CeloOperationMode =
   | "activate"
   | "register";
 
+export type CeloVoteType = "pending" | "active";
+
 export type CeloPendingWithdrawal = {
   value: BigNumber;
   time: BigNumber;
@@ -57,21 +59,17 @@ export type CeloValidatorGroup = {
 };
 export type CeloVote = {
   validatorGroup: string;
-  pendingAmount: BigNumber;
-  activeAmount: BigNumber;
+  amount: BigNumber;
   activatable: boolean;
+  type: CeloVoteType;
+  index: number;
 };
 export type CeloVoteRaw = {
   validatorGroup: string;
-  pendingAmount: string;
-  activeAmount: string;
+  amount: string;
   activatable: boolean;
-};
-export type CeloRevoke = {
-  validatorGroup: string;
+  type: CeloVoteType;
   index: number;
-  amount: BigNumber;
-  activeStatus: boolean;
 };
 export type CeloPreloadData = {
   validatorGroups: CeloValidatorGroup[];

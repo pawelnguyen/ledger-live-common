@@ -21,15 +21,17 @@ export function toCeloResourcesRaw(r: CeloResources): CeloResourcesRaw {
     })),
     votes: votes?.map((vote) => ({
       validatorGroup: vote.validatorGroup.toString(),
-      pendingAmount: vote.pendingAmount.toString(),
-      activeAmount: vote.activeAmount.toString(),
+      amount: vote.amount.toString(),
       activatable: vote.activatable,
+      type: vote.type,
+      index: vote.index,
     })),
   };
 }
 
 export function fromCeloResourcesRaw(r: CeloResourcesRaw): CeloResources {
-  const { registrationStatus, lockedBalance, nonvotingLockedBalance, votes } = r;
+  const { registrationStatus, lockedBalance, nonvotingLockedBalance, votes } =
+    r;
   return {
     registrationStatus,
     lockedBalance: new BigNumber(lockedBalance),
@@ -41,9 +43,10 @@ export function fromCeloResourcesRaw(r: CeloResourcesRaw): CeloResources {
     })),
     votes: votes?.map((vote) => ({
       validatorGroup: vote.validatorGroup,
-      pendingAmount: new BigNumber(vote.pendingAmount),
-      activeAmount: new BigNumber(vote.activeAmount),
+      amount: new BigNumber(vote.amount),
       activatable: vote.activatable,
+      type: vote.type,
+      index: vote.index,
     })),
   };
 }

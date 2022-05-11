@@ -33,7 +33,7 @@ export const getPendingWithdrawals = async (address: string) => {
 };
 
 /**
- * Fetch all votes, with an `activatable` flag for votes that can be activated
+ * Fetch all votes
  */
 export const getVotes = async (address: string): Promise<CeloVote[]> => {
   const election = await celoKit().contracts.getElection();
@@ -42,12 +42,29 @@ export const getVotes = async (address: string): Promise<CeloVote[]> => {
   const activatableValidatorGroups = activates.map(
     (activate) => activate.txo.arguments[0]
   );
-  return voter.votes.map((vote) => ({
-    validatorGroup: vote.group,
-    pendingAmount: vote.pending,
-    activeAmount: vote.active,
-    activatable: activatableValidatorGroups.includes(vote.group),
-  }));
+
+  const votes: CeloVote[] = [];
+  voter.votes.forEach((vote) => {
+    if (vote.pending.gt(0))
+      votes.push({
+        validatorGroup: vote.group,
+        amount: vote.pending,
+        // That's because not all pending votes can be activated, 24h has to pass
+        activatable: activatableValidatorGroups.includes(vote.group),
+        index: 0,
+        type: "pending",
+      });
+    if (vote.active.gt(0))
+      votes.push({
+        validatorGroup: vote.group,
+        amount: vote.active,
+        activatable: false,
+        index: 1,
+        type: "active",
+      });
+  });
+
+  return votes;
 };
 
 const getActivateTransactionObjects = async (address: string) => {
