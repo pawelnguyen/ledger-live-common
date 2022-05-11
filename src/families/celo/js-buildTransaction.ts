@@ -3,7 +3,7 @@ import type { Account } from "../../types";
 import { CeloTx } from "@celo/connect";
 import { celoKit } from "./api/sdk";
 import { BigNumber } from "bignumber.js";
-import { getRevoke } from "./logic";
+import { getVote } from "./logic";
 
 // TODO: a lot of this code overlaps with getFeesForTransaction, but not all. Check if passing an extracted
 // celoTransaction from here to getFees estimateGas would work
@@ -137,11 +137,7 @@ const transactionValue = (
     ) {
       value = account.celoResources.nonvotingLockedBalance;
     } else if (transaction.mode === "revoke" && account.celoResources) {
-      const revoke = getRevoke(
-        account,
-        transaction.recipient,
-        transaction.index
-      );
+      const revoke = getVote(account, transaction.recipient, transaction.index);
       if (revoke?.amount) value = revoke.amount;
     } else {
       value = account.spendableBalance.minus(transaction.fees || 0);

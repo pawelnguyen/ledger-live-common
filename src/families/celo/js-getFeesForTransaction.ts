@@ -2,7 +2,7 @@ import { BigNumber } from "bignumber.js";
 import type { Account } from "../../types";
 import type { Transaction } from "./types";
 import { celoKit } from "./api/sdk";
-import { getRevoke } from "./logic";
+import { getVote } from "./logic";
 
 const getFeesForTransaction = async ({
   account,
@@ -61,11 +61,7 @@ const getFeesForTransaction = async ({
     gas = await vote.txo.estimateGas({ from: account.freshAddress });
   } else if (transaction.mode === "revoke") {
     if (transaction.useAllAmount) {
-      const revoke = getRevoke(
-        account,
-        transaction.recipient,
-        transaction.index
-      );
+      const revoke = getVote(account, transaction.recipient, transaction.index);
       if (revoke?.amount) value = revoke.amount;
     }
 
