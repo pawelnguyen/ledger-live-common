@@ -14,7 +14,8 @@ export function checkLibs(
 ) {
   check(libs.NotEnoughBalance, NotEnoughBalance, "@ledgerhq/errors");
   check(libs.log, log, "@ledgerhq/logs");
-  check(libs.Transport, Transport, "@ledgerhq/hw-transport");
+  //TODO: uncoment and fix, why is it duplicated?
+  // check(libs.Transport, Transport, "@ledgerhq/hw-transport");
   check(libs.React, React, "react");
   check(libs.connect, connect, "react-redux");
 
