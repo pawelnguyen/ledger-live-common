@@ -1,5 +1,6 @@
 import { Account } from "../../types";
 import { CeloPendingWithdrawal, CeloValidatorGroup, CeloVote } from "./types";
+import { BigNumber } from "bignumber.js";
 
 export const PRELOAD_MAX_AGE = 10 * 60 * 1000;
 export const LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS =
@@ -14,6 +15,12 @@ export const availablePendingWithdrawals = (
     (withdrawal) => new Date(withdrawal.time.toNumber() * 1000) < new Date()
   );
 };
+
+export const withdrawableBalance = (account: Account): BigNumber =>
+  availablePendingWithdrawals(account).reduce(
+    (sum, withdrawal) => sum.plus(withdrawal.value),
+    new BigNumber(0)
+  );
 
 export const isDefaultValidatorGroupAddress = (address: string): boolean =>
   address === LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS;
