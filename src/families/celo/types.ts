@@ -61,6 +61,7 @@ export type CeloVote = {
   validatorGroup: string;
   amount: BigNumber;
   activatable: boolean;
+  revokable: boolean;
   type: CeloVoteType;
   index: number;
 };
@@ -68,6 +69,7 @@ export type CeloVoteRaw = {
   validatorGroup: string;
   amount: string;
   activatable: boolean;
+  revokable: boolean;
   type: CeloVoteType;
   index: number;
 };

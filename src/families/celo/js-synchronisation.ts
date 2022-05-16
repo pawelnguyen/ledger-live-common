@@ -35,6 +35,7 @@ const getAccountShape: GetAccountShape = async (info) => {
     : [];
 
   const votes = accountRegistrationStatus ? await getVotes(address) : [];
+  console.log('votes !!', votes)
 
   const operations = mergeOps(oldOperations, newOperations);
   const shape = {
