@@ -35,6 +35,12 @@ export const activatableVotes = (account: Account): CeloVote[] => {
   return (votes || []).filter((vote) => vote.activatable);
 };
 
+export const revokableVotes = (account: Account): CeloVote[] => {
+  const { votes } = account.celoResources || {};
+
+  return (votes || []).filter((vote) => vote.revokable);
+};
+
 export const getVote = (
   account: Account,
   validatorGroupAddress: string,
