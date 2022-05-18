@@ -22,6 +22,9 @@ export const withdrawableBalance = (account: Account): BigNumber =>
     new BigNumber(0)
   );
 
+export const defaultValidatorGroupAddress = (): string =>
+  LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS;
+
 export const isDefaultValidatorGroupAddress = (address: string): boolean =>
   address === LEDGER_BY_FIGMENT_VALIDATOR_GROUP_ADDRESS;
 
