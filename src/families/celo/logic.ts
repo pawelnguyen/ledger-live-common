@@ -1,5 +1,5 @@
 import { Account } from "../../types";
-import { CeloPendingWithdrawal, CeloValidatorGroup, CeloVote } from "./types";
+import { CeloPendingWithdrawal, CeloValidatorGroup, CeloVote, CeloVoteStatus } from "./types";
 import { BigNumber } from "bignumber.js";
 
 export const PRELOAD_MAX_AGE = 10 * 60 * 1000;
@@ -55,3 +55,8 @@ export const getVote = (
       revoke.validatorGroup === validatorGroupAddress && revoke.index == index
   );
 };
+
+export const voteStatus = (vote: CeloVote): CeloVoteStatus =>
+  vote.type === "pending" && vote.activatable
+    ? "awaitingActivation"
+    : vote.type;

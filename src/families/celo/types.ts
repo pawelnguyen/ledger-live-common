@@ -15,6 +15,7 @@ export type CeloOperationMode =
   | "register";
 
 export type CeloVoteType = "pending" | "active";
+export type CeloVoteStatus = CeloVoteType | "awaitingActivation";
 
 export type CeloPendingWithdrawal = {
   value: BigNumber;
