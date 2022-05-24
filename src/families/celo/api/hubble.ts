@@ -55,9 +55,14 @@ const getOperationType = (type: string): OperationType => {
       return "WITHDRAW";
     case "ValidatorGroupVoteCastSent":
       return "VOTE";
-    //  TODO: revoke, ACTIVATE, REGISTER
-    case "RewardReceived":
-      return "REWARD";
+    case "ValidatorGroupActiveVoteRevoked":
+      return "REVOKE";
+    case "ValidatorGroupPendingVoteRevoked":
+      return "REVOKE";
+    case "ValidatorGroupVoteActivated":
+      return "APPROVE";
+    case "AccountCreated":
+      return "CREATE";
     case "AccountSlashed":
       return "SLASH";
     default:
@@ -77,13 +82,12 @@ const transactionToOperation = (
   const senders = transaction.data.from ? [transaction.data.from] : [];
   const recipients = transaction.data.to ? [transaction.data.to] : [];
 
-  // if locked, remove sent transaction?
   return {
     id: encodeOperationId(accountId, transaction.transaction_hash, type),
     hash: transaction.transaction_hash,
     accountId,
     fee: new BigNumber(0),
-    value: adjustValueForType(new BigNumber(transaction.amount), type),
+    value: new BigNumber(transaction.amount),
     type,
     blockHeight: transaction.height,
     date: new Date(transaction.time),
@@ -110,10 +114,11 @@ export const getAccountDetails = async (address: string, accountId: string) => {
   const lockedGold = await kit.contracts.getLockedGold();
 
   const allTransactions = accountDetails.internal_transfers
-    .filter((transfer) => {
-      transfer.data?.to != lockedGold.address &&
-        transfer.data?.from != lockedGold.address;
-    })
+    .filter(
+      (transfer) =>
+        transfer.data?.to != lockedGold.address &&
+        transfer.data?.from != lockedGold.address
+    )
     .concat(accountDetails.transactions);
 
   const operations = allTransactions.map((transaction) =>
@@ -160,9 +165,4 @@ const customValidatorGroupsOrder = (validatorGroups): CeloValidatorGroup[] => {
   }
 
   return sortedValidatorGroups;
-};
-
-const adjustValueForType = (amount: BigNumber, type): BigNumber => {
-  if (["LOCK", "VOTE"].includes(type)) return amount.multipliedBy(-1);
-  return amount;
 };
