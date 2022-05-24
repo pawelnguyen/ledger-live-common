@@ -9,13 +9,27 @@ import buildTransaction from "./js-buildTransaction";
 import { rlpEncodedTx, encodeTransaction } from "@celo/wallet-base";
 import { tokenInfoByAddressAndChainId } from "@celo/wallet-ledger/lib/tokens";
 import { withDevice } from "../../hw/deviceAccess";
+import { OperationType } from "../../types";
+
+const MODE_TO_TYPE = {
+  send: "OUT",
+  lock: "LOCK",
+  unlock: "UNLOCK",
+  withdraw: "WITHDRAW",
+  vote: "VOTE",
+  revoke: "REVOKE",
+  activate: "ACTIVATE",
+  register: "REGISTER",
+  default: "FEE",
+};
 
 const buildOptimisticOperation = (
   account: Account,
   transaction: Transaction,
   fee: BigNumber
 ): Operation => {
-  const type = "OUT";
+  const type = (MODE_TO_TYPE[transaction.mode] ??
+    MODE_TO_TYPE.default) as OperationType;
 
   const value = new BigNumber(transaction.amount).plus(fee);
 
@@ -31,7 +45,7 @@ const buildOptimisticOperation = (
     recipients: [transaction.recipient].filter(Boolean),
     accountId: account.id,
     date: new Date(),
-    extra: { additionalField: transaction.amount },
+    extra: {},
   };
 
   return operation;

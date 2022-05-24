@@ -5,6 +5,7 @@ import { Operation, OperationType } from "../../../types";
 import { encodeOperationId } from "../../../operation";
 import { CeloValidatorGroup } from "../types";
 import { isDefaultValidatorGroup } from "../logic";
+import { celoKit } from "./sdk";
 
 const DEFAULT_TRANSACTIONS_LIMIT = 200;
 const getUrl = (route): string => `${getEnv("API_CELO_INDEXER")}${route || ""}`;
@@ -38,24 +39,27 @@ const fetchValidatorGroups = async () => {
   return data.items;
 };
 
+//TODO: fetch extra - validator group addresses for vote etc. Rename freeze -> lock etc
+
 const getOperationType = (type: string): OperationType => {
   switch (type) {
     case "InternalTransferSent":
       return "OUT";
     case "InternalTransferReceived":
       return "IN";
+    case "GoldLocked":
+      return "LOCK";
+    case "GoldUnlocked":
+      return "UNLOCK";
+    case "GoldWithdrawn":
+      return "WITHDRAW";
     case "ValidatorGroupVoteCastSent":
       return "VOTE";
+    //  TODO: revoke, ACTIVATE, REGISTER
     case "RewardReceived":
       return "REWARD";
     case "AccountSlashed":
       return "SLASH";
-    case "GoldLocked":
-      return "FREEZE";
-    case "GoldUnlocked":
-      return "UNFREEZE";
-    case "GoldWithdrawn":
-      return "REWARD_PAYOUT";
     default:
       return "NONE";
   }
@@ -73,12 +77,13 @@ const transactionToOperation = (
   const senders = transaction.data.from ? [transaction.data.from] : [];
   const recipients = transaction.data.to ? [transaction.data.to] : [];
 
+  // if locked, remove sent transaction?
   return {
     id: encodeOperationId(accountId, transaction.transaction_hash, type),
     hash: transaction.transaction_hash,
     accountId,
     fee: new BigNumber(0),
-    value: new BigNumber(transaction.amount),
+    value: adjustValueForType(new BigNumber(transaction.amount), type),
     type,
     blockHeight: transaction.height,
     date: new Date(transaction.time),
@@ -100,9 +105,17 @@ export const getAccountDetails = async (address: string, accountId: string) => {
   const balance = spendableBalance.plus(lockedBalance);
   const indexerStatus = await fetchStatus();
 
-  const allTransactions = accountDetails.internal_transfers.concat(
-    accountDetails.transactions
-  );
+  //TODO: refactor, cache, move to sdk
+  const kit = celoKit();
+  const lockedGold = await kit.contracts.getLockedGold();
+
+  const allTransactions = accountDetails.internal_transfers
+    .filter((transfer) => {
+      transfer.data?.to != lockedGold.address &&
+        transfer.data?.from != lockedGold.address;
+    })
+    .concat(accountDetails.transactions);
+
   const operations = allTransactions.map((transaction) =>
     transactionToOperation(address, accountId, transaction)
   );
@@ -147,4 +160,9 @@ const customValidatorGroupsOrder = (validatorGroups): CeloValidatorGroup[] => {
   }
 
   return sortedValidatorGroups;
+};
+
+const adjustValueForType = (amount: BigNumber, type): BigNumber => {
+  if (["LOCK", "VOTE"].includes(type)) return amount.multipliedBy(-1);
+  return amount;
 };
