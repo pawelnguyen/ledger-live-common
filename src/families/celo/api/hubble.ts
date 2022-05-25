@@ -79,20 +79,22 @@ const transactionToOperation = (
   const hasFailed = transaction.data.success
     ? !transaction.data.success
     : false;
-  const senders = transaction.data.from ? [transaction.data.from] : [];
-  const recipients = transaction.data.to ? [transaction.data.to] : [];
+  const data = transaction.data;
+  const sender = data?.Account || data?.from;
+  const recipient = data?.Group || data?.to;
 
   return {
     id: encodeOperationId(accountId, transaction.transaction_hash, type),
     hash: transaction.transaction_hash,
     accountId,
+    //TODO: fetch/calculate fee from indexer when gas data is available
     fee: new BigNumber(0),
     value: new BigNumber(transaction.amount),
     type,
     blockHeight: transaction.height,
     date: new Date(transaction.time),
-    senders,
-    recipients,
+    senders: sender ? [sender] : [],
+    recipients: recipient ? [recipient] : [],
     hasFailed,
     blockHash: null,
     extra: {},
