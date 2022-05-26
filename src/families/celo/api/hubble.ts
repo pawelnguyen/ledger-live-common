@@ -88,7 +88,7 @@ const transactionToOperation = (
     hash: transaction.transaction_hash,
     accountId,
     //TODO: fetch/calculate fee from indexer when gas data is available
-    fee: new BigNumber(0),
+    fee: new BigNumber(150930000000000),
     value: new BigNumber(transaction.amount),
     type,
     blockHeight: transaction.height,
@@ -141,6 +141,7 @@ export const getValidatorGroups = async (): Promise<CeloValidatorGroup[]> => {
   const validatorGroups = await fetchValidatorGroups();
 
   const result = validatorGroups.map((validatorGroup) => ({
+    //TODO: toLowerCase()?
     address: validatorGroup.address,
     name: validatorGroup.name || validatorGroup.address,
     votes: new BigNumber(validatorGroup.active_votes).plus(
