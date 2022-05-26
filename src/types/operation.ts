@@ -39,6 +39,7 @@ export type OperationType =
   | "WITHDRAW"
   | "REVOKE"
   | "ACTIVATE"
+  | "REGISTER"
   // NFT
   | "NFT_IN"
   | "NFT_OUT";

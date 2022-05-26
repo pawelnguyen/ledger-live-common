@@ -55,14 +55,14 @@ const getOperationType = (type: string): OperationType => {
       return "WITHDRAW";
     case "ValidatorGroupVoteCastSent":
       return "VOTE";
-    case "ValidatorGroupActiveVoteRevoked":
+    case "ValidatorGroupActiveVoteRevokedSent":
       return "REVOKE";
-    case "ValidatorGroupPendingVoteRevoked":
+    case "ValidatorGroupPendingVoteRevokedSent":
       return "REVOKE";
-    case "ValidatorGroupVoteActivated":
-      return "APPROVE";
+    case "ValidatorGroupVoteActivatedSent":
+      return "ACTIVATE";
     case "AccountCreated":
-      return "CREATE";
+      return "REGISTER";
     case "AccountSlashed":
       return "SLASH";
     default:
@@ -82,14 +82,19 @@ const transactionToOperation = (
   const data = transaction.data;
   const sender = data?.Account || data?.from;
   const recipient = data?.Group || data?.to;
+  //TODO: fetch/calculate fee from indexer when gas data is available
+  const fee = new BigNumber(150930000000000);
+  const value =
+    type === "LOCK"
+      ? new BigNumber(transaction.amount).plus(fee)
+      : new BigNumber(transaction.amount);
 
   return {
     id: encodeOperationId(accountId, transaction.transaction_hash, type),
     hash: transaction.transaction_hash,
     accountId,
-    //TODO: fetch/calculate fee from indexer when gas data is available
-    fee: new BigNumber(150930000000000),
-    value: new BigNumber(transaction.amount),
+    fee,
+    value,
     type,
     blockHeight: transaction.height,
     date: new Date(transaction.time),
